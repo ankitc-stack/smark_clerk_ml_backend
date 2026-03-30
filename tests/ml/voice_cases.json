@@ -1,0 +1,1086 @@
+{
+  "cases": [
+    {
+      "id": "vc001",
+      "lang": "en",
+      "transcript": "Make paragraph 1 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc002",
+      "lang": "en",
+      "transcript": "Make para 2 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc003",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc004",
+      "lang": "hinglish",
+      "transcript": "para 1 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc005",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc006",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc007",
+      "lang": "en",
+      "transcript": "Expand paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc008",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc009",
+      "lang": "en",
+      "transcript": "Shorten paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc010",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc011",
+      "lang": "en",
+      "transcript": "Make paragraph 2 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc012",
+      "lang": "en",
+      "transcript": "Make para 3 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc013",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc014",
+      "lang": "hinglish",
+      "transcript": "para 2 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc015",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc016",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc017",
+      "lang": "en",
+      "transcript": "Expand paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc018",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc019",
+      "lang": "en",
+      "transcript": "Shorten paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc020",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc021",
+      "lang": "en",
+      "transcript": "Make paragraph 3 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc022",
+      "lang": "en",
+      "transcript": "Make para 1 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc023",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc024",
+      "lang": "hinglish",
+      "transcript": "para 3 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc025",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc026",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc027",
+      "lang": "en",
+      "transcript": "Expand paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc028",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc029",
+      "lang": "en",
+      "transcript": "Shorten paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc030",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc031",
+      "lang": "en",
+      "transcript": "Make paragraph 1 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc032",
+      "lang": "en",
+      "transcript": "Make para 2 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc033",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc034",
+      "lang": "hinglish",
+      "transcript": "para 1 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc035",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc036",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc037",
+      "lang": "en",
+      "transcript": "Expand paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc038",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc039",
+      "lang": "en",
+      "transcript": "Shorten paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc040",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc041",
+      "lang": "en",
+      "transcript": "Make paragraph 2 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc042",
+      "lang": "en",
+      "transcript": "Make para 3 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc043",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc044",
+      "lang": "hinglish",
+      "transcript": "para 2 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc045",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc046",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc047",
+      "lang": "en",
+      "transcript": "Expand paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc048",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc049",
+      "lang": "en",
+      "transcript": "Shorten paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc050",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc051",
+      "lang": "en",
+      "transcript": "Make paragraph 3 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc052",
+      "lang": "en",
+      "transcript": "Make para 1 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc053",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc054",
+      "lang": "hinglish",
+      "transcript": "para 3 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc055",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc056",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc057",
+      "lang": "en",
+      "transcript": "Expand paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc058",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc059",
+      "lang": "en",
+      "transcript": "Shorten paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc060",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc061",
+      "lang": "en",
+      "transcript": "Make paragraph 1 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc062",
+      "lang": "en",
+      "transcript": "Make para 2 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc063",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc064",
+      "lang": "hinglish",
+      "transcript": "para 1 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc065",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc066",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc067",
+      "lang": "en",
+      "transcript": "Expand paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc068",
+      "lang": "hinglish",
+      "transcript": "paragraph 2 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc069",
+      "lang": "en",
+      "transcript": "Shorten paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc070",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 shorten karo",
+      "expected": {
+        "status": "applied",
+        "action": "SHORTEN_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc071",
+      "lang": "en",
+      "transcript": "Make paragraph 2 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc072",
+      "lang": "en",
+      "transcript": "Make para 3 formal",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc073",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc074",
+      "lang": "hinglish",
+      "transcript": "para 2 ko formal karo",
+      "expected": {
+        "status": "applied",
+        "action": "CHANGE_TONE",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc075",
+      "lang": "en",
+      "transcript": "Rewrite paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc076",
+      "lang": "hinglish",
+      "transcript": "paragraph 1 rewrite karo",
+      "expected": {
+        "status": "applied",
+        "action": "REWRITE_CONTENT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc077",
+      "lang": "en",
+      "transcript": "Expand paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc078",
+      "lang": "hinglish",
+      "transcript": "paragraph 3 expand karo",
+      "expected": {
+        "status": "applied",
+        "action": "EXPAND_CONTENT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc079",
+      "lang": "en",
+      "transcript": "make paragraph 1 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc080",
+      "lang": "hinglish",
+      "transcript": "make paragraph 2 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc081",
+      "lang": "en",
+      "transcript": "make paragraph 3 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc082",
+      "lang": "hinglish",
+      "transcript": "make paragraph 1 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc083",
+      "lang": "en",
+      "transcript": "make paragraph 2 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc084",
+      "lang": "hinglish",
+      "transcript": "make paragraph 3 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc085",
+      "lang": "en",
+      "transcript": "make paragraph 1 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc086",
+      "lang": "hinglish",
+      "transcript": "make paragraph 2 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc087",
+      "lang": "en",
+      "transcript": "make paragraph 3 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc088",
+      "lang": "hinglish",
+      "transcript": "make paragraph 1 formal",
+      "simulate_stt_error": "low_confidence",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc089",
+      "lang": "en",
+      "transcript": "",
+      "simulate_stt_error": "transcription_failure",
+      "expected": {
+        "status": "error",
+        "error_code": "could_not_understand_audio"
+      }
+    },
+    {
+      "id": "vc090",
+      "lang": "en",
+      "transcript": "",
+      "simulate_stt_error": "transcription_failure",
+      "expected": {
+        "status": "error",
+        "error_code": "could_not_understand_audio"
+      }
+    },
+    {
+      "id": "vc091",
+      "lang": "en",
+      "transcript": "",
+      "simulate_stt_error": "transcription_failure",
+      "expected": {
+        "status": "error",
+        "error_code": "could_not_understand_audio"
+      }
+    },
+    {
+      "id": "vc092",
+      "lang": "en",
+      "transcript": "",
+      "simulate_stt_error": "transcription_failure",
+      "expected": {
+        "status": "error",
+        "error_code": "could_not_understand_audio"
+      }
+    },
+    {
+      "id": "vc093",
+      "lang": "en",
+      "transcript": "Make paragraph 2 neutral",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc094",
+      "lang": "en",
+      "transcript": "Insert this line",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc095",
+      "lang": "en",
+      "transcript": "Delete paragraph 1",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc096",
+      "lang": "en",
+      "transcript": "Replace paragraph 2 with approved text",
+      "expected": {
+        "status": "needs_clarification"
+      }
+    },
+    {
+      "id": "vc097",
+      "lang": "en",
+      "transcript": "Make paragraph 1 formal",
+      "simulate_version_conflict": true,
+      "expected": {
+        "status": "error",
+        "error_code": "version_conflict"
+      }
+    },
+    {
+      "id": "vc098",
+      "lang": "en",
+      "transcript": "Make paragraph 2 formal",
+      "simulate_version_conflict": true,
+      "expected": {
+        "status": "error",
+        "error_code": "version_conflict"
+      }
+    },
+    {
+      "id": "vc099",
+      "lang": "en",
+      "transcript": "Make paragraph 3 formal",
+      "simulate_version_conflict": true,
+      "expected": {
+        "status": "error",
+        "error_code": "version_conflict"
+      }
+    },
+    {
+      "id": "vc100",
+      "lang": "en",
+      "transcript": "Make paragraph 1 formal",
+      "simulate_version_conflict": true,
+      "expected": {
+        "status": "error",
+        "error_code": "version_conflict"
+      }
+    },
+    {
+      "id": "vc101",
+      "lang": "en",
+      "transcript": "Make paragraph 1 bold",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc102",
+      "lang": "en",
+      "transcript": "Make para 2 italic",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc103",
+      "lang": "en",
+      "transcript": "Highlight paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc104",
+      "lang": "en",
+      "transcript": "Underline paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc105",
+      "lang": "en",
+      "transcript": "Make paragraph 2 bold",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc106",
+      "lang": "en",
+      "transcript": "Make para 3 italic",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "id": "vc107",
+      "lang": "en",
+      "transcript": "Highlight paragraph 1",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "id": "vc108",
+      "lang": "en",
+      "transcript": "Underline paragraph 2",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc109",
+      "lang": "en",
+      "transcript": "Make paragraph 2 bold and italic",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "id": "vc110",
+      "lang": "en",
+      "transcript": "font size 14 for paragraph 3",
+      "expected": {
+        "status": "applied",
+        "action": "SET_FORMAT",
+        "target_para_id": "p3"
+      }
+    }
+  ]
+}

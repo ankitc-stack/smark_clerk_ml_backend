@@ -1,0 +1,6 @@
+﻿[
+  {"prompt":"Write a demi official letter: My dear Sharma, ...", "expected":"DO_LETTER"},
+  {"prompt":"Government of India letter with Subject: ...", "expected":"GOI_LETTER"},
+  {"prompt":"Leave certificate for 10 days EL from ...", "expected":"LEAVE_CERTIFICATE"},
+  {"prompt":"Movement order to proceed from ...", "expected":"MOVEMENT_ORDER"}
+]

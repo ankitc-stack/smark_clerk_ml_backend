@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+*.env.local
+
+# Project data (never commit)
+data/
+storage/
+
+# Database files
+*.db
+*.sqlite3
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Internal planning docs
+Smart-Clerk-3.0-Final-Development-Plan.txt
+Smart-Clerk-3.0-Final-Development-Plan.docx
+
+# Dev artifacts at root
+tmp_*.docx
+mo_rendered.docx
+nul
+python_files.txt
+uvicorn.log
+test_refill_all.py
+README_v2.md
+docai.db
+
+# Claude Code internal
+.claude/

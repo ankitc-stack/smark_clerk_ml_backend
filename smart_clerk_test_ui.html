@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Clerk — Pipeline Test</title>
+<style>
+  /* ── Variables ─────────────────────────────────────────── */
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #13161e;
+    --surface2:  #1a1e2a;
+    --border:    #252b3b;
+    --accent:    #4f7ef8;
+    --accent2:   #38bdf8;
+    --green:     #22c55e;
+    --red:       #f87171;
+    --yellow:    #fbbf24;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    --font-ui:   'IBM Plex Sans', 'Segoe UI', sans-serif;
+    --radius:    6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 48px 1fr;
+  }
+
+  /* ── Topbar ────────────────────────────────────────────── */
+  #topbar {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+  }
+  #topbar .logo {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: .04em;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  #topbar .logo span { color: var(--muted); font-weight: 400; }
+  #base-url-wrap {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+  }
+  #base-url-wrap label { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  #base-url {
+    flex: 1; max-width: 340px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 5px 10px; border-radius: var(--radius);
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  #health-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted); flex-shrink: 0;
+    transition: background .3s;
+  }
+  #health-dot.ok   { background: var(--green); }
+  #health-dot.err  { background: var(--red); }
+  #health-label { font-size: 12px; color: var(--muted); }
+
+  /* ── Sidebar ───────────────────────────────────────────── */
+  #sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 12px 0;
+    overflow-y: auto;
+  }
+  .sidebar-group { margin-bottom: 4px; }
+  .sidebar-group-label {
+    padding: 8px 16px 4px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background .15s, border-color .15s;
+    font-size: 13px;
+  }
+  .sidebar-item:hover { background: var(--surface2); }
+  .sidebar-item.active {
+    background: rgba(79,126,248,.1);
+    border-left-color: var(--accent);
+    color: var(--accent);
+  }
+  .sidebar-item .method-badge {
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+    padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .badge-get   { background: rgba(56,189,248,.15); color: var(--accent2); }
+  .badge-post  { background: rgba(79,126,248,.15); color: var(--accent); }
+  .badge-patch { background: rgba(251,191,36,.15); color: #f59e0b; }
+
+  /* ── Main panel ────────────────────────────────────────── */
+  #main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Panel header ──────────────────────────────────────── */
+  #panel-header {
+    padding: 16px 24px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  #panel-title { font-size: 16px; font-weight: 600; }
+  #panel-method {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px; text-transform: uppercase;
+  }
+  #panel-path {
+    font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  }
+  #btn-send {
+    margin-left: auto;
+    background: var(--accent); color: #fff;
+    border: none; padding: 7px 18px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    letter-spacing: .02em;
+    transition: opacity .2s;
+  }
+  #btn-send:hover { opacity: .85; }
+  #btn-send:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── Split pane ────────────────────────────────────────── */
+  #split {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+  }
+
+  /* ── Request / Response panes ──────────────────────────── */
+  .pane {
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+  .pane:last-child { border-right: none; }
+  .pane-header {
+    padding: 8px 16px;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pane-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+  /* ── Form elements ─────────────────────────────────────── */
+  .form-group { margin-bottom: 14px; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  label.field-label {
+    display: block; margin-bottom: 5px;
+    font-size: 11px; font-weight: 600;
+    color: var(--muted); letter-spacing: .06em; text-transform: uppercase;
+  }
+  label.field-label .required { color: var(--red); margin-left: 2px; }
+  label.field-label .hint {
+    color: #3a4460; font-size: 10px;
+    text-transform: none; letter-spacing: 0; font-weight: 400;
+    margin-left: 4px;
+  }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius);
+    padding: 7px 10px; font-size: 13px;
+    font-family: var(--font-ui);
+    transition: border-color .2s;
+    outline: none;
+  }
+  input[type=text]:focus, input[type=number]:focus,
+  select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+  textarea {
+    font-family: var(--font-mono); font-size: 12px;
+    resize: vertical; min-height: 80px;
+  }
+  textarea.tall { min-height: 160px; }
+  select option { background: var(--surface2); }
+
+  /* ── Response viewer ───────────────────────────────────── */
+  #resp-status {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .status-ok  { background: rgba(34,197,94,.15);  color: var(--green); }
+  .status-err { background: rgba(248,113,113,.15); color: var(--red); }
+  .status-warn{ background: rgba(251,191,36,.15);  color: var(--yellow); }
+
+  pre#resp-body {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    font-family: var(--font-mono); font-size: 11.5px;
+    white-space: pre-wrap; word-break: break-all;
+    line-height: 1.6; color: #a5b4c8;
+    min-height: 120px;
+  }
+
+  /* ── Quick action chips ────────────────────────────────── */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── State bar ─────────────────────────────────────────── */
+  #state-bar {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 6px 16px;
+    display: flex; align-items: center; gap: 16px;
+    font-size: 11px; color: var(--muted); flex-shrink: 0;
+  }
+  .state-item { display: flex; align-items: center; gap: 5px; }
+  .state-item .val { color: var(--text); font-family: var(--font-mono); }
+  .state-item .val.empty { color: var(--muted); }
+
+  /* ── Section display (filled doc preview) ──────────────── */
+  .section-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px;
+  }
+  .section-card .sec-type {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-card .sec-id {
+    font-family: var(--font-mono); font-size: 10px;
+    background: var(--border); padding: 1px 6px; border-radius: 3px;
+  }
+  .section-card .sec-content { font-size: 12px; line-height: 1.6; color: #c8d3e8; }
+
+  /* ── Download button ───────────────────────────────────── */
+  .dl-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(79,126,248,.15); border: 1px solid rgba(79,126,248,.3);
+    color: var(--accent); padding: 5px 12px; border-radius: var(--radius);
+    font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none;
+    margin-top: 8px;
+    transition: background .2s;
+  }
+  .dl-btn:hover { background: rgba(79,126,248,.25); }
+
+  /* ── Loader ────────────────────────────────────────────── */
+  .spinner {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  .spinner.visible { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Warning banner ────────────────────────────────────── */
+  .warn-banner {
+    background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.25);
+    border-radius: var(--radius); padding: 8px 12px; margin-bottom: 10px;
+    font-size: 12px; color: var(--yellow); display: none;
+  }
+  .warn-banner.visible { display: block; }
+
+  /* ── Section tabs (for views inside response) ──────────── */
+  .tab-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .tab-btn {
+    padding: 6px 14px; font-size: 12px; cursor: pointer;
+    color: var(--muted); border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Scrollbar ─────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ── Mic button ─────────────────────────────────────────── */
+  .mic-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 5px 14px; border-radius: var(--radius);
+    font-size: 12px; cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .mic-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mic-btn.recording {
+    background: rgba(248,113,113,.12); border-color: var(--red); color: var(--red);
+  }
+  .mic-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0;
+    animation: mic-pulse 1s ease-in-out infinite;
+  }
+  @keyframes mic-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .4; transform: scale(.75); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Topbar ──────────────────────────────────────────────── -->
+<div id="topbar">
+  <div class="logo">SMART CLERK <span>/ Pipeline Test</span></div>
+  <div id="base-url-wrap">
+    <label>API BASE</label>
+    <input id="base-url" type="text" value="http://localhost:8000" />
+  </div>
+  <div id="health-dot"></div>
+  <span id="health-label">checking…</span>
+  <span id="auth-user-label" style="margin-left:auto;font-size:12px;color:var(--muted);"></span>
+</div>
+
+<!-- ── Sidebar ────────────────────────────────────────────── -->
+<nav id="sidebar">
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Auth</div>
+    <div class="sidebar-item" data-panel="auth-register">
+      <span class="method-badge badge-post">POST</span>/auth/register
+    </div>
+    <div class="sidebar-item" data-panel="auth-login">
+      <span class="method-badge badge-post">POST</span>/auth/login
+    </div>
+    <div class="sidebar-item" data-panel="auth-me">
+      <span class="method-badge badge-get">GET</span>/auth/me
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Health</div>
+    <div class="sidebar-item" data-panel="health">
+      <span class="method-badge badge-get">GET</span>/health
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Templates</div>
+    <div class="sidebar-item" data-panel="templates-list">
+      <span class="method-badge badge-get">GET</span>/templates
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Upload</div>
+    <div class="sidebar-item" data-panel="upload">
+      <span class="method-badge badge-post">POST</span>/documents/upload
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Document Flow</div>
+    <div class="sidebar-item" data-panel="command">
+      <span class="method-badge badge-post">POST</span>/documents/{id}/command
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Blueprint</div>
+    <div class="sidebar-item" data-panel="blueprint-create">
+      <span class="method-badge badge-post">POST</span>/documents/generate
+    </div>
+    <div class="sidebar-item" data-panel="patch-section">
+      <span class="method-badge badge-patch">PATCH</span>/documents/{id}/sections/{sid}
+    </div>
+    <div class="sidebar-item" data-panel="checkpoint">
+      <span class="method-badge badge-post">POST</span>/documents/{id}/checkpoint
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Version History</div>
+    <div class="sidebar-item" data-panel="versions">
+      <span class="method-badge badge-get">GET</span>/documents/{id}/versions
+    </div>
+    <div class="sidebar-item" data-panel="download">
+      <span class="method-badge badge-get">GET</span>/versions/{id}/download
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Letter Templates</div>
+    <div class="sidebar-item" data-panel="saveTemplate">
+      <span class="method-badge badge-post">POST</span>/documents/{id}/save-as-template
+    </div>
+    <div class="sidebar-item" data-panel="listTemplates">
+      <span class="method-badge badge-get">GET</span>/saved-templates
+    </div>
+    <div class="sidebar-item" data-panel="fromTemplate">
+      <span class="method-badge badge-post">POST</span>/documents/from-template/{id}
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Documents</div>
+    <div class="sidebar-item" data-panel="recentDocs">
+      <span class="method-badge badge-get">GET</span>/documents
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Feedback</div>
+    <div class="sidebar-item" data-panel="rateFeedback">
+      <span class="method-badge badge-post">POST</span>/feedback
+    </div>
+  </div>
+
+</nav>
+
+<!-- ── Main ───────────────────────────────────────────────── -->
+<div id="main">
+
+  <div id="panel-header">
+    <span id="panel-method" class="method-badge badge-get">GET</span>
+    <span id="panel-title">Health Check</span>
+    <span id="panel-path">/health</span>
+    <button id="btn-send">Send</button>
+    <div class="spinner" id="spinner"></div>
+  </div>
+
+  <div id="split">
+    <!-- Request pane -->
+    <div class="pane">
+      <div class="pane-header">Request</div>
+      <div class="pane-body" id="req-pane">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Response pane -->
+    <div class="pane">
+      <div class="pane-header">
+        Response
+        <span id="resp-status"></span>
+        <span id="resp-time" style="margin-left:auto;font-size:10px;color:var(--muted)"></span>
+      </div>
+      <div class="pane-body" id="resp-pane">
+        <pre id="resp-body">— no response yet —</pre>
+        <div id="resp-parsed"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State bar (persisted doc/version context) -->
+  <div id="state-bar">
+    <div class="state-item">doc_id: <span class="val empty" id="s-doc-id">—</span></div>
+    <div class="state-item">rev: <span class="val empty" id="s-version">—</span></div>
+    <div class="state-item">de-ver: <span class="val empty" id="s-de-ver">—</span></div>
+    <div class="state-item">doc_type: <span class="val empty" id="s-doc-type">—</span></div>
+    <div class="state-item">template_id: <span class="val empty" id="s-tpl-id">—</span></div>
+    <div style="margin-left:auto; display:flex; gap:8px;">
+      <button onclick="clearState()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:2px 10px;border-radius:4px;cursor:pointer;font-size:11px;">Clear State</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE — persisted across requests so each step auto-fills
+// ═══════════════════════════════════════════════════════════
+const state = {
+  docId:            null,
+  version:          null,
+  docengineVersion: null,   // doc-engine version (for PATCH /sections)
+  docRev:           null,   // 0-based per-document revision shown to user (v0, v1, v2…)
+  isBlueprint:      false,
+  docType:          null,
+  templateId:       null,
+  lastFilled:       null,   // last filled JSON returned from /fill or /refill
+  lastDocxUrl:      null,
+  token:            null,   // JWT access token from /auth/login or /auth/register
+  userEmail:        null,
+};
+
+function saveState(resp, docType) {
+  const isNewDoc = !!resp.document_id && resp.document_id !== state.docId;
+  if (resp.document_id)  state.docId      = resp.document_id;
+  if (resp.version_id   != null) state.version   = resp.version_id;
+  if (resp.current_version_id != null) state.version = resp.current_version_id;
+  if (resp.version      != null && resp.blueprint_id) state.version = resp.version;
+  if (resp.docengine_version != null) state.docengineVersion = resp.docengine_version;
+  if (resp.blueprint_id) state.isBlueprint = true;
+  if (docType)           state.docType    = docType;
+  if (resp.doc_type)     state.docType    = resp.doc_type;
+  if (resp.template_id)  state.templateId = resp.template_id;
+  if (resp.filled)       state.lastFilled = resp.filled;
+  if (resp.docx_url)     state.lastDocxUrl= resp.docx_url;
+  // Reset docRev to 0 when a brand-new document is created.
+  if (isNewDoc) state.docRev = 0;
+  renderStateBar();
+}
+
+function renderStateBar() {
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    el.textContent = val || '—';
+    el.className   = 'val' + (val ? '' : ' empty');
+  };
+  set('s-doc-id',  state.docId);
+  set('s-version', state.docRev != null ? `v${state.docRev}` : state.version);
+  set('s-de-ver',  state.docengineVersion);
+  set('s-doc-type',state.docType);
+  set('s-tpl-id',  state.templateId);
+}
+
+function clearState() {
+  Object.assign(state, { docId:null, version:null, docengineVersion:null, isBlueprint:false, docType:null, templateId:null, lastFilled:null, lastDocxUrl:null });
+  renderStateBar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PANELS — definition of each sidebar item's form
+// ═══════════════════════════════════════════════════════════
+const panels = {
+
+  // ── Auth: Register ──────────────────────────────────────
+  'auth-register': {
+    title: 'Register', method: 'POST', path: '/auth/register',
+    fields: [
+      { id:'reg_email',     label:'email',     type:'email',    required:true,  placeholder:'you@example.com' },
+      { id:'reg_password',  label:'password',  type:'password', required:true,  placeholder:'min 6 chars' },
+      { id:'reg_fullname',  label:'full_name', type:'text',     required:false, placeholder:'Your Name (optional)' },
+    ],
+    async execute(f) {
+      const body = { email: f.reg_email, password: f.reg_password };
+      if (f.reg_fullname) body.full_name = f.reg_fullname;
+      const res = await apiFetch('POST', '/auth/register', body);
+      if (res._ok && res.body.access_token) {
+        state.token     = res.body.access_token;
+        state.userEmail = res.body.email;
+        document.getElementById('auth-user-label').textContent = '🔐 ' + res.body.email;
+      }
+      return res;
+    },
+  },
+
+  // ── Auth: Login ─────────────────────────────────────────
+  'auth-login': {
+    title: 'Login', method: 'POST', path: '/auth/login',
+    fields: [
+      { id:'login_email',    label:'email',    type:'email',    required:true, placeholder:'you@example.com' },
+      { id:'login_password', label:'password', type:'password', required:true },
+    ],
+    async execute(f) {
+      const res = await apiFetch('POST', '/auth/login', { email: f.login_email, password: f.login_password });
+      if (res._ok && res.body.access_token) {
+        state.token     = res.body.access_token;
+        state.userEmail = res.body.email;
+        document.getElementById('auth-user-label').textContent = '🔐 ' + res.body.email;
+      }
+      return res;
+    },
+  },
+
+  // ── Auth: Me ────────────────────────────────────────────
+  'auth-me': {
+    title: 'Who Am I', method: 'GET', path: '/auth/me',
+    fields: [],
+    async execute() {
+      return apiFetchAuth('GET', '/auth/me');
+    },
+  },
+
+  // ── Health ──────────────────────────────────────────────
+  health: {
+    title: 'Health Check', method: 'GET', path: '/health',
+    fields: [],
+    async execute() { return apiFetch('GET', '/health'); },
+  },
+
+  // ── List templates ──────────────────────────────────────
+  'templates-list': {
+    title: 'List Templates', method: 'GET', path: '/templates',
+    fields: [
+      { id:'doc_type_filter', label:'doc_type filter', type:'select',
+        hint:'optional',
+        options:['(all)','SERVICE_LETTER','GOI_LETTER','DO_LETTER','MOVEMENT_ORDER','LEAVE_CERTIFICATE','INVITATION_LETTER'] },
+    ],
+    async execute(f) {
+      const qs = f.doc_type_filter && f.doc_type_filter !== '(all)'
+        ? `?doc_type=${f.doc_type_filter}` : '';
+      return apiFetch('GET', `/templates${qs}`);
+    },
+  },
+
+  // ── Get skeleton ────────────────────────────────────────
+
+    // ── Command ─────────────────────────────────────────────
+  command: {
+    title: 'Command (Voice/Text)', method: 'POST', path: '/documents/{id}/command',
+    fields: [
+      { id:'doc_id',      label:'document_id', type:'text', required:true,
+        hint:'auto-filled', placeholder:'doc_…' },
+      { id:'version',     label:'version',     type:'number', required:true,
+        hint:'auto-filled' },
+      { id:'cmd_text',    label:'command text', type:'textarea', required:true,
+        placeholder:'e.g. Add a remarks section before the signature' },
+      { id:'section_id',  label:'current_section_id', type:'select',
+        hint:'context — active section',
+        options:['(none)','sec_ref_001','sec_date_001','sec_receiver_001',
+                 'sec_subject_001','sec_body_001','sec_signee_001'] },
+    ],
+    quickPrompts: [
+      ['Insert remarks', 'Add a remarks section before the signature'],
+      ['Delete section', 'Delete the receiver block'],
+      ['Rewrite body', 'Rewrite the body paragraphs to be more concise'],
+      ['Expand para 1', 'Expand paragraph 1 with supporting details'],
+      ['Shorten para 2', 'Shorten paragraph 2'],
+      ['Formal tone', 'Change tone of paragraph 1 to formal'],
+      ['Add para', 'Add a new paragraph after paragraph 2'],
+      ['Remove para', 'Remove paragraph 3'],
+    ],
+    onMount() {
+      if (state.docId)  setField('doc_id',  state.docId);
+      if (state.version != null) setField('version', state.version);
+      injectMicRow();
+      clearMic();   // reset any previous recording when switching to this panel
+    },
+    async execute(f) {
+      const sectionId = f.section_id === '(none)' ? null : f.section_id;
+      let inputPayload;
+      if (micState.blob) {
+        const ab64 = await blobToBase64(micState.blob);
+        // Pre-transcribe so the user can see what was heard in the text box
+        const tr = await fetch(`${base()}/stt/transcribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audio_base64: ab64, mime_type: micState.mime }),
+        });
+        if (tr.ok) {
+          const trBody = await tr.json();
+          if (trBody.transcript) setField('cmd_text', trBody.transcript);
+        }
+        inputPayload = { type: 'voice', audio_base64: ab64, mime_type: micState.mime };
+      } else {
+        inputPayload = { type: 'text', value: f.cmd_text };
+      }
+      const body = {
+        version:    parseInt(f.version),
+        auto_retry: false,
+        context: {
+          current_section_id:    sectionId,
+          selected_section_ids:  [],
+          cursor_position:       null,
+        },
+        input: inputPayload,
+      };
+      const data = await apiFetch('POST', `/documents/${f.doc_id}/command`, body);
+      if (data._ok) {
+        const b = data.body;
+        if (b.status === 'applied') {
+          if (b.version != null) state.version = b.version;
+          if (b.docengine_version != null) state.docengineVersion = b.docengine_version;
+          if (state.docRev != null) state.docRev += 1;
+          renderStateBar();
+          // Keep version field in sync for next command.
+          setField('version', state.version);
+        }
+      }
+      return data;
+    },
+    clearOnSuccess: ['cmd_text'],
+    renderResponse(data) {
+      if (!data._ok) return;
+      const b = data.body;
+      if (b.status === 'needs_clarification') {
+        renderClarification(b.clarification);
+      } else if (b.status === 'applied') {
+        renderApplied(b);
+      }
+    },
+  },
+
+  // ── Blueprint document creation ──────────────────────────
+  'blueprint-create': {
+    title: 'Blueprint Doc', method: 'POST', path: '/documents/generate',
+    fields: [
+      { id:'template_id', label:'template_id', type:'select',
+        options:['tmpl_svc_001','tmpl_inv_001','tmpl_goi_001','tmpl_do_001','tmpl_mov_001','tmpl_leave_001'],
+        hint:'svc=Service Letter | inv=Invitation | goi=GOI Letter | do=DO Letter | mov=Movement Order | leave=Leave Cert' },
+      { id:'user_id', label:'user_id', type:'text', default:'test-user' },
+      { id:'prompt', label:'prompt (optional — or use mic)', type:'textarea',
+        placeholder:'e.g. write leave certificate for Sgt Ramesh Kumar No 1234567 for 10 days annual leave wef 15 Mar 2026' },
+    ],
+    onMount() {
+      injectMicRow();
+      clearMic();
+    },
+    async execute(f) {
+      let promptText = f.prompt || '';
+      if (micState.blob) {
+        const ab64 = await blobToBase64(micState.blob);
+        const tr = await fetch(`${base()}/stt/transcribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audio_base64: ab64, mime_type: micState.mime }),
+        });
+        if (!tr.ok) {
+          const err = await tr.json().catch(() => ({}));
+          return { _ok:false, status: tr.status, body: err, _ms: 0 };
+        }
+        const trBody = await tr.json();
+        promptText = trBody.transcript || promptText;
+        setField('prompt', promptText);  // show transcript in textarea
+      }
+      const body = { template_id: f.template_id, user_id: f.user_id, inputs: {}, prompt: promptText };
+      const data = await apiFetch('POST', '/documents/generate', body);
+      if (data._ok) saveState(data.body, data.body.doc_type);
+      return data;
+    },
+    clearOnSuccess: ['prompt'],
+    renderResponse(data) {
+      if (!data._ok) return;
+      const sections = data.body.data?.sections || [];
+      renderSectionList(sections);
+      appendDownloadLink(data.body.document_id, data.body.version, state.docRev);
+    },
+  },
+
+  // ── Patch section (blueprint direct edit) ────────────────
+  'patch-section': {
+    title: 'Patch Section', method: 'PATCH', path: '/documents/{doc_id}/sections/{section_id}',
+    fields: [
+      { id:'doc_id',     label:'document_id', type:'text', required:true,
+        hint:'auto-filled', placeholder:'doc_…' },
+      { id:'section_id', label:'section_id',  type:'text', required:true,
+        placeholder:'e.g. sec_subject_001' },
+      { id:'version',    label:'de-version',  type:'number', required:true,
+        hint:'auto-filled (de-ver)' },
+      { id:'content',    label:'content (JSON)', type:'textarea', required:true,
+        placeholder:'{"text":"New subject line"}' },
+    ],
+    onMount() {
+      if (state.docId)            setField('doc_id',  state.docId);
+      if (state.docengineVersion != null) setField('version', state.docengineVersion);
+    },
+    async execute(f) {
+      let content;
+      try { content = JSON.parse(f.content); }
+      catch { return { _ok:false, status:400, body:{ detail:'content is not valid JSON' } }; }
+      const data = await apiFetch('PATCH',
+        `/documents/${f.doc_id}/sections/${f.section_id}`,
+        { version: parseInt(f.version), content });
+      if (data._ok && data.body.version != null) {
+        state.docengineVersion = data.body.version;
+        renderStateBar();
+      }
+      return data;
+    },
+  },
+
+  // ── Save / Checkpoint ────────────────────────────────────
+  checkpoint: {
+    title: 'Save (Checkpoint)', method: 'POST', path: '/documents/{doc_id}/checkpoint',
+    fields: [
+      { id:'doc_id', label:'document_id', type:'text', required:true,
+        hint:'auto-filled', placeholder:'doc_…' },
+    ],
+    onMount() {
+      if (state.docId) setField('doc_id', state.docId);
+    },
+    async execute(f) {
+      const data = await apiFetch('POST', `/documents/${f.doc_id}/checkpoint`, {});
+      if (data._ok && data.body) {
+        if (data.body.version        != null) state.version          = data.body.version;
+        if (data.body.docengine_version != null) state.docengineVersion = data.body.docengine_version;
+        renderStateBar();
+        if (data.body.docx_url) appendDownloadLink(f.doc_id, data.body.version, null);
+      }
+      return data;
+    },
+  },
+
+  // ── Version history ──────────────────────────────────────
+  versions: {
+    title: 'Version History', method: 'GET', path: '/documents/{id}/versions',
+    fields: [
+      { id:'doc_id', label:'document_id', type:'text', required:true,
+        hint:'auto-filled', placeholder:'doc_…' },
+    ],
+    onMount() { if (state.docId) setField('doc_id', state.docId); },
+    async execute(f) {
+      return apiFetch('GET', `/documents/${f.doc_id}/versions`);
+    },
+    renderResponse(data) {
+      if (!data._ok || !Array.isArray(data.body)) return;
+      renderVersionList(data.body);
+    },
+  },
+
+  // ── Upload Letter ────────────────────────────────────────
+  upload: {
+    title: 'Upload Letter', method: 'POST', path: '/documents/upload',
+    fields: [
+      { id:'upload_file', label:'file', type:'file', required:true,
+        accept:'.docx,.pdf,.jpg,.jpeg,.png,.tiff,.tif,.bmp',
+        hint:'DOCX · PDF · JPG · PNG · TIFF · BMP' },
+      { id:'letter_type', label:'letter_type', type:'select',
+        options:['auto','goi_letter','service_letter','do_letter','movement_order','leave_certificate','invitation_letter'],
+        hint:'Select letter type for better DOCX export (auto = detect from content)' },
+      { id:'user_id', label:'user_id', type:'text', default:'test-user' },
+    ],
+    async execute(f) {
+      const fileEl = document.getElementById('upload_file');
+      const file = fileEl && fileEl.files && fileEl.files[0];
+      if (!file) return { _ok:false, status:400, body:{ detail:'No file selected' }, _ms:0 };
+      const t0 = Date.now();
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        if (f.user_id) fd.append('user_id', f.user_id);
+        const lt = f.letter_type || 'auto';
+        if (lt && lt !== 'auto') fd.append('letter_type', lt);
+        const r = await fetch(`${base()}/documents/upload`, { method:'POST', body: fd });
+        const text = await r.text();
+        let parsed;
+        try { parsed = JSON.parse(text); } catch { parsed = { raw: text }; }
+        return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+      } catch(e) {
+        return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+      }
+    },
+    renderResponse(data) {
+      if (!data._ok) return;
+      const b = data.body;
+      const _isNewUpload = !!b.document_id && b.document_id !== state.docId;
+      state.docId = b.document_id;
+      state.version = b.version;
+      state.docengineVersion = b.docengine_version;
+      state.docType = b.doc_type;
+      if (_isNewUpload) state.docRev = 0;
+      renderStateBar();
+      const secs = b.data && b.data.sections || [];
+      const warn = b.render_warning ? `<span style="color:var(--yellow);font-size:12px">⚠ ${b.render_warning}</span>` : '';
+      const el = $id('resp-parsed');
+      el.innerHTML = `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+        <span style="color:var(--green);font-weight:700">✓ Uploaded</span>
+        <span style="color:var(--muted);font-size:12px">${secs.length} section(s) extracted · de_ver ${b.docengine_version}</span>
+        <span style="color:var(--muted);font-size:12px">blueprint: ${b.blueprint_id} · type: ${b.doc_type}</span>
+        ${warn}
+      </div>`;
+      renderSectionList(secs);
+      appendDownloadLink(b.document_id, b.version, state.docRev);
+    },
+  },
+
+  // ── Download ─────────────────────────────────────────────
+  download: {
+    title: 'Download DOCX', method: 'GET', path: '/documents/{id}/versions/{vid}/download',
+    fields: [
+      { id:'doc_id',     label:'document_id', type:'text', required:true,
+        hint:'auto-filled', placeholder:'doc_…' },
+      { id:'dl_rev',     label:'rev',         type:'text', required:false,
+        hint:'auto-filled (e.g. v2)' },
+      { id:'format',     label:'format',      type:'select',
+        options:['docx','pdf'] },
+    ],
+    onMount() {
+      if (state.docId)  setField('doc_id',  state.docId);
+      setField('dl_rev', state.docRev != null ? `v${state.docRev}` : (state.version ?? ''));
+    },
+    async execute(f) {
+      // Use state.version (global PK) for the actual URL — dl_rev is display only.
+      const vid = state.version;
+      if (!vid) return { _ok:false, status:0, body:{ error:'No version loaded — generate or load a document first.' }, _ms:0 };
+      const url = `${base()}/documents/${f.doc_id}/versions/${vid}/download?format=${f.format}`;
+      window.open(url, '_blank');
+      return { _ok:true, status:200, body:{ info: `Downloading ${f.format.toUpperCase()} · rev ${f.dl_rev}` }, _ms:0 };
+    },
+  },
+
+  // ── Save as Template ──────────────────────────────────────
+  saveTemplate: {
+    title: 'Save as Template', method: 'POST', path: '/documents/{doc_id}/save-as-template',
+    fields: [
+      { id:'tpl_doc_id',     label:'doc_id',      type:'text', required:true,
+        hint:'auto-filled from current doc', placeholder:'doc_…' },
+      { id:'tpl_letter_type', label:'letter_type (optional)', type:'select',
+        options:['','service_letter','goi_letter','do_letter','movement_order','leave_certificate','invitation_letter'],
+        hint:'Leave blank to auto-detect from the document' },
+      { id:'tpl_display_name', label:'display_name', type:'text',
+        placeholder:'e.g. TA Directorate Service Letter',
+        hint:'Name shown in the template dropdown' },
+    ],
+    onMount() {
+      if (state.docId) setField('tpl_doc_id', state.docId);
+    },
+    async execute(f) {
+      const t0 = Date.now();
+      const docId = f.tpl_doc_id;
+      if (!docId) return { _ok:false, status:400, body:{ detail:'doc_id required' }, _ms:0 };
+      try {
+        const r = await fetch(`${base()}/documents/${docId}/save-as-template`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            letter_type: f.tpl_letter_type || null,
+            display_name: f.tpl_display_name || '',
+          }),
+        });
+        const parsed = await r.json().catch(() => ({}));
+        return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+      } catch(e) {
+        return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+      }
+    },
+    renderResponse(data) {
+      if (!data._ok) return;
+      const b = data.body;
+      const el = $id('resp-parsed');
+      el.innerHTML = `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;align-items:center">
+        <span style="color:var(--green);font-weight:700">✓ Template saved</span>
+        <span style="color:var(--muted);font-size:12px">id: <b>${b.template_id}</b></span>
+        <span style="color:var(--muted);font-size:12px">${b.section_count} section(s) · type: ${b.letter_type}</span>
+        <button onclick="useTemplate('${b.template_id}','${b.letter_type}')"
+          style="font-size:12px;padding:3px 12px;cursor:pointer;background:var(--accent);color:#fff;border:none;border-radius:4px;font-weight:600">
+          Generate Now →
+        </button>
+      </div>
+      <div style="font-size:12px;color:var(--fg)">${b.display_name}</div>`;
+    },
+  },
+
+  // ── List / Delete Saved Templates ─────────────────────────
+  listTemplates: {
+    title: 'Saved Templates', method: 'GET', path: '/saved-templates',
+    fields: [
+      { id:'filter_letter_type', label:'letter_type (filter)', type:'select',
+        options:['','service_letter','goi_letter','do_letter','movement_order','leave_certificate','invitation_letter'],
+        hint:'Leave blank to list all' },
+    ],
+    async execute(f) {
+      const t0 = Date.now();
+      try {
+        const qs = f.filter_letter_type ? `?letter_type=${encodeURIComponent(f.filter_letter_type)}` : '';
+        const r = await fetch(`${base()}/saved-templates${qs}`);
+        const parsed = await r.json().catch(() => ({}));
+        return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+      } catch(e) {
+        return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+      }
+    },
+    renderResponse(data) {
+      const el = $id('resp-parsed');
+      if (!data._ok || !Array.isArray(data.body)) return;
+      const items = data.body;
+      if (!items.length) { el.innerHTML = '<span style="color:var(--muted)">No templates saved yet.</span>'; return; }
+      const rows = items.map(t => `
+        <tr>
+          <td style="padding:4px 8px">${t.display_name}</td>
+          <td style="padding:4px 8px;color:var(--muted);font-size:11px">${t.letter_type}</td>
+          <td style="padding:4px 8px;color:var(--muted);font-size:11px">${t.section_count} secs</td>
+          <td style="padding:4px 8px;color:var(--muted);font-size:11px">${t.saved_at.slice(0,10)}</td>
+          <td style="padding:4px 8px">
+            <button onclick="useTemplate('${t.template_id}','${t.letter_type}')" style="font-size:11px;padding:2px 8px;cursor:pointer;background:var(--accent);color:#fff;border:none;border-radius:3px">Use</button>
+            <button onclick="deleteTemplate('${t.template_id}', this)" style="font-size:11px;padding:2px 8px;cursor:pointer;background:#c0392b;color:#fff;border:none;border-radius:3px;margin-left:4px">Del</button>
+          </td>
+        </tr>`).join('');
+      el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="padding:4px 8px;text-align:left">Name</th>
+          <th style="padding:4px 8px;text-align:left">Type</th>
+          <th style="padding:4px 8px;text-align:left">Sections</th>
+          <th style="padding:4px 8px;text-align:left">Date</th>
+          <th style="padding:4px 8px;text-align:left">Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    },
+  },
+
+  // ── New from Template ────────────────────────────────────
+  fromTemplate: {
+    title: 'New from Template', method: 'POST', path: '/documents/from-template/{template_id}',
+    fields: [
+      { id:'from_tpl_id',  label:'template_id', type:'text', required:true,
+        hint:'Auto-filled when you click Use on a saved template', placeholder:'service_letter_abc12345' },
+      { id:'from_user_id', label:'user_id',      type:'text', default:'test-user' },
+      { id:'from_prompt',  label:'prompt (optional — or use mic)', type:'textarea',
+        placeholder:'e.g. write service letter about budget allocation for annual camp 2026',
+        hint:'AI fills subject + body paragraphs; your saved letterhead + signee are kept' },
+    ],
+    onMount() {
+      injectMicRow();
+      clearMic();
+    },
+    async execute(f) {
+      const t0 = Date.now();
+      if (!f.from_tpl_id) return { _ok:false, status:400, body:{ detail:'template_id required' }, _ms:0 };
+      try {
+        let promptText = (f.from_prompt || '').trim();
+        // If voice recorded, transcribe first then use as prompt
+        if (micState.blob) {
+          const ab64 = await blobToBase64(micState.blob);
+          const tr = await fetch(`${base()}/stt/transcribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio_base64: ab64, mime_type: micState.mime }),
+          });
+          if (!tr.ok) {
+            const err = await tr.json().catch(() => ({}));
+            return { _ok:false, status: tr.status, body: err, _ms: Date.now()-t0 };
+          }
+          const trBody = await tr.json();
+          promptText = trBody.transcript || promptText;
+          setField('from_prompt', promptText);  // show transcript in textarea
+        }
+        const qs = new URLSearchParams({ user_id: f.from_user_id || 'test-user' });
+        if (promptText) qs.set('prompt', promptText);
+        const r = await fetch(
+          `${base()}/documents/from-template/${encodeURIComponent(f.from_tpl_id)}?${qs}`,
+          { method:'POST' }
+        );
+        const parsed = await r.json().catch(() => ({}));
+        return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+      } catch(e) {
+        return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+      }
+    },
+    renderResponse(data) {
+      if (!data._ok) return;
+      const b = data.body;
+      const _isNewFromTpl = !!b.document_id && b.document_id !== state.docId;
+      state.docId = b.document_id;
+      state.version = b.version;
+      state.docengineVersion = b.docengine_version;
+      state.docType = b.doc_type;
+      if (_isNewFromTpl) state.docRev = 0;
+      renderStateBar();
+      const secs = (b.data && b.data.sections) || [];
+      const el = $id('resp-parsed');
+      el.innerHTML = `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+        <span style="color:var(--green);font-weight:700">✓ Created from template</span>
+        <span style="color:var(--muted);font-size:12px">${secs.length} section(s) · de_ver ${b.docengine_version}</span>
+        <span style="color:var(--muted);font-size:12px">type: ${b.doc_type}</span>
+        ${b.render_warning ? `<span style="color:var(--yellow);font-size:12px">⚠ ${b.render_warning}</span>` : ''}
+      </div>`;
+      renderSectionList(secs);
+      appendDownloadLink(b.document_id, b.version, state.docRev);
+    },
+    clearOnSuccess: ['from_prompt'],
+  },
+
+  // ── Recent Documents ────────────────────────────────────
+  recentDocs: {
+    title: 'Recent Documents', method: 'GET', path: '/documents',
+    fields: [
+      { id:'recent_user_id', label:'user_id', type:'text', default:'test-user' },
+    ],
+    async execute(f) {
+      const t0 = Date.now();
+      try {
+        const r = await fetch(`${base()}/documents?user_id=${encodeURIComponent(f.recent_user_id||'test-user')}`);
+        const parsed = await r.json().catch(() => ({}));
+        return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+      } catch(e) {
+        return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+      }
+    },
+    renderResponse(data) {
+      const el = $id('resp-parsed');
+      if (!data._ok || !Array.isArray(data.body)) return;
+      const docs = data.body;
+      if (!docs.length) { el.innerHTML = '<span style="color:var(--muted)">No documents found.</span>'; return; }
+      const rows = docs.map(d => `
+        <tr style="cursor:pointer" onclick="loadDoc('${d.document_id}','${d.doc_type}')">
+          <td style="padding:4px 8px">${d.title || '(untitled)'}</td>
+          <td style="padding:4px 8px;color:var(--muted);font-size:11px">${d.doc_type}</td>
+          <td style="padding:4px 8px;color:var(--muted);font-size:11px">${(d.created_at||'').slice(0,10)}</td>
+          <td style="padding:4px 8px;font-size:11px;color:var(--accent)">${d.document_id.slice(0,8)}…</td>
+        </tr>`).join('');
+      el.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">Click a row to load its doc_id into state.</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="padding:4px 8px;text-align:left">Title</th>
+          <th style="padding:4px 8px;text-align:left">Type</th>
+          <th style="padding:4px 8px;text-align:left">Date</th>
+          <th style="padding:4px 8px;text-align:left">ID</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    },
+  },
+
+  // ── Feedback ─────────────────────────────────────────────
+  rateFeedback: {
+    title: 'Rate Last Output', method: 'POST', path: '/documents/{doc_id}/feedback',
+    fields: [
+      { id:'fb_rating',     label:'Rating',     type:'select',   options:['down','up'], default:'up' },
+      { id:'fb_field',      label:'Field',      type:'select',   options:['overall','subject','paragraph_1','paragraph_2','salutation','signee'], default:'overall',
+        hint:'paragraph options auto-expand based on loaded document' },
+      { id:'fb_correction', label:'Correction', type:'textarea', default:'', placeholder:'What should it have said? (optional)' },
+    ],
+    onMount() {
+      // Dynamically add paragraph options based on actual section count in current doc
+      const sel = $id('fb_field');
+      if (!sel) return;
+      // Count paragraph-type sections from the last rendered section list
+      const secCards = document.querySelectorAll('#resp-parsed .section-card');
+      let paraCount = 0;
+      secCards.forEach(card => {
+        const typeEl = card.querySelector('.sec-type');
+        if (typeEl && typeEl.textContent.toLowerCase().includes('paragraph')) paraCount++;
+      });
+      const needed = Math.max(paraCount, 2);
+      // Add para options beyond what's already there
+      const existing = Array.from(sel.options).map(o => o.value);
+      for (let i = 3; i <= needed; i++) {
+        const val = `paragraph_${i}`;
+        if (!existing.includes(val)) {
+          const opt = document.createElement('option');
+          opt.value = val; opt.textContent = val;
+          // Insert before signee option
+          const signeeOpt = Array.from(sel.options).find(o => o.value === 'signee');
+          sel.insertBefore(opt, signeeOpt || null);
+        }
+      }
+    },
+    async execute(f) {
+      const t0 = Date.now();
+      const docId = state.doc_id;
+      if (!docId) return { _ok:false, status:0, body:{ error:'No doc_id in state — generate or upload a document first.' }, _ms:0 };
+      const payload = {
+        version_id: parseInt(state.version) || 1,
+        rating:     f.fb_rating || 'up',
+        field:      f.fb_field  || 'overall',
+        correction: f.fb_correction || '',
+      };
+      try {
+        const r = await fetch(`${base()}/documents/${docId}/feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const parsed = await r.json().catch(() => ({}));
+        return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+      } catch(e) {
+        return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+      }
+    },
+    renderResponse(data) {
+      const el = $id('resp-parsed');
+      if (!data._ok) return;
+      const b = data.body;
+      el.innerHTML = `<div style="color:var(--green);font-size:13px;padding:8px 0">
+        ✓ Feedback saved — ID: <code>${b.feedback_id || '?'}</code>
+      </div>`;
+    },
+  },
+
+};
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+const base   = () => document.getElementById('base-url').value.replace(/\/$/, '');
+const $id    = id => document.getElementById(id);
+const setField = (id, val) => { const el = $id(id); if (el) el.value = val; };
+
+async function apiFetch(method, path, body) {
+  const t0 = Date.now();
+  try {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(base() + path, opts);
+    const text = await r.text();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch { parsed = { raw: text }; }
+    return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+  } catch(e) {
+    return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+  }
+}
+
+async function apiFetchAuth(method, path, body) {
+  const t0 = Date.now();
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+    const opts = { method, headers };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(base() + path, opts);
+    const text = await r.text();
+    let parsed;
+    try { parsed = JSON.parse(text); } catch { parsed = { raw: text }; }
+    return { _ok: r.ok, status: r.status, body: parsed, _ms: Date.now()-t0 };
+  } catch(e) {
+    return { _ok:false, status:0, body:{ error: String(e) }, _ms: Date.now()-t0 };
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function renderSectionList(sections) {
+  const el = $id('resp-parsed');
+  el.innerHTML = '<div class="tab-row"><span class="tab-btn active" onclick="switchTab(this,\'parsed\')">Sections</span><span class="tab-btn" onclick="switchTab(this,\'raw\')">Raw JSON</span></div>';
+  const parsed = document.createElement('div');
+  parsed.id = 'tab-parsed';
+  sections.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    const text = extractSectionText(s);
+    card.innerHTML = `
+      <div class="sec-type">
+        ${s.type || '?'}
+        <span class="sec-id">${s.id || ''}</span>
+      </div>
+      <div class="sec-content">${escHtml(text) || '<em style="color:var(--muted)">empty</em>'}</div>`;
+    parsed.appendChild(card);
+  });
+  el.appendChild(parsed);
+}
+
+function extractSectionText(s) {
+  const c = s.content || {};
+  if (c.text)  return c.text;
+  if (c.value) return c.value;
+  if (c.lines) return c.lines.filter(Boolean).join(' · ');
+  if (c.items) return c.items.map((it,i) => `${i+1}. ${it.text||''}`).join('\n');
+  // fallback: try Lexical richtext
+  try {
+    const root = c.richtext?.state?.root;
+    if (root) {
+      return root.children
+        .map(p => p.children?.map(n => n.text||'').join('')||'').join(' ');
+    }
+  } catch {}
+  return '';
+}
+
+function renderClarification(cl) {
+  const el = $id('resp-parsed');
+  el.innerHTML = `
+    <div class="warn-banner visible">⚠ Needs clarification</div>
+    <p style="font-size:13px;margin-bottom:10px">${escHtml(cl.question)}</p>
+    <div class="chips">
+      ${(cl.options||[]).map(o =>
+        `<span class="chip">${escHtml(o.label||o.token||JSON.stringify(o))}</span>`
+      ).join('')}
+    </div>`;
+}
+
+function renderApplied(b) {
+  const el = $id('resp-parsed');
+  const ops = b.updates || b.ops || [];
+  const meta = b.meta || {};
+  const transcriptHtml = meta.transcript
+    ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:12px">
+        <span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Transcript</span>
+        <div style="margin-top:4px;color:var(--text)">"${escHtml(meta.transcript)}"</div>
+        ${meta.stt_model ? `<div style="margin-top:3px;color:var(--muted);font-size:10px">${escHtml(meta.stt_model)} · ${meta.stt_latency_ms ?? '?'}ms · conf ${meta.stt_confidence != null ? (meta.stt_confidence*100).toFixed(0)+'%' : '?'}</div>` : ''}
+       </div>` : '';
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="color:var(--green);font-weight:700">✓ Applied</span>
+      <span style="color:var(--muted);font-size:12px">version → ${b.version}</span>
+      ${meta.input_source === 'voice' ? '<span style="font-size:11px;color:var(--accent2)">🎤 voice</span>' : ''}
+    </div>
+    ${transcriptHtml}
+    ${ops.length ? `
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Ops applied</div>
+    ${ops.map(op => `
+      <div class="section-card" style="margin-bottom:6px">
+        <div class="sec-type">${escHtml(op.op||'?')}</div>
+        <div class="sec-content">${escHtml(JSON.stringify(op,null,2))}</div>
+      </div>`).join('')}` : ''}`;
+  // Append download link for the new version so user gets the re-rendered DOCX
+  if (state.docId && b.version != null) {
+    appendDownloadLink(state.docId, b.version, state.docRev);
+  }
+}
+
+function renderVersionList(versions) {
+  const el = $id('resp-parsed');
+  el.innerHTML = '';
+  versions.forEach((v, idx) => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.innerHTML = `
+      <div class="sec-type">
+        v${idx}
+        <span class="sec-id">${new Date(v.created_at).toLocaleString()}</span>
+      </div>
+      <div class="sec-content">${escHtml(v.prompt_preview||'(no prompt)')}</div>
+      <a class="dl-btn" href="${base()}${v.docx_url}" target="_blank">↓ DOCX</a>
+      ${v.pdf_url ? `<a class="dl-btn" href="${base()}${v.pdf_url}" target="_blank" style="margin-left:6px">↓ PDF</a>` : ''}`;
+    el.appendChild(card);
+  });
+}
+
+function appendDownloadLink(docId, versionId, rev) {
+  if (!docId || versionId == null) return;
+  const url = `${base()}/documents/${docId}/versions/${versionId}/download?format=docx`;
+  const el = $id('resp-parsed');
+  const a = document.createElement('a');
+  a.className = 'dl-btn';
+  a.href = url;
+  a.target = '_blank';
+  const revLabel = rev != null ? ` (v${rev})` : '';
+  a.textContent = `↓ Download DOCX${revLabel}`;
+  el.appendChild(a);
+}
+
+// ── Mic / voice recording ─────────────────────────────────
+const micState = { blob: null, mime: '', durationSec: 0, stream: null, recorder: null, timer: null, chunks: [] };
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function injectMicRow() {
+  const pane = $id('req-pane');
+  if (!pane || $id('mic-row')) return;
+  const div = document.createElement('div');
+  div.className = 'form-group';
+  div.id = 'mic-row';
+  div.innerHTML = `
+    <label class="field-label">voice input <span class="hint">— recorded audio replaces text command when sent</span></label>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap">
+      <button id="btn-mic" class="mic-btn" type="button" onclick="toggleMic()">🎤 Record</button>
+      <span id="mic-status" style="font-size:12px;color:var(--muted)">not recording</span>
+      <button id="btn-mic-clear" type="button" onclick="clearMic()"
+        style="display:none;font-size:11px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:var(--radius);cursor:pointer">
+        ✕ Clear
+      </button>
+    </div>`;
+  pane.appendChild(div);
+}
+
+async function toggleMic() {
+  if (micState.recorder && micState.recorder.state === 'recording') {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    micState.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(e) {
+    alert('Microphone access denied: ' + e.message);
+    return;
+  }
+  micState.chunks = [];
+  const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus' : 'audio/webm';
+  micState.mime = mimeType;
+  micState.recorder = new MediaRecorder(micState.stream, { mimeType });
+  micState.recorder.ondataavailable = e => { if (e.data.size > 0) micState.chunks.push(e.data); };
+  micState.recorder.onstop = async () => {
+    micState.blob = new Blob(micState.chunks, { type: micState.mime });
+    micState.stream.getTracks().forEach(t => t.stop());
+    clearInterval(micState.timer);
+    const btn = $id('btn-mic');
+    const status = $id('mic-status');
+    const clearBtn = $id('btn-mic-clear');
+    if (btn) { btn.className = 'mic-btn'; btn.innerHTML = '🎤 Re-record'; }
+    if (status) { status.style.color = 'var(--green)'; status.textContent = `✓ ${micState.durationSec}s recorded — transcribing…`; }
+    if (clearBtn) clearBtn.style.display = '';
+    // Auto-transcribe and fill the active text field
+    try {
+      const ab64 = await blobToBase64(micState.blob);
+      const tr = await fetch(`${base()}/stt/transcribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audio_base64: ab64, mime_type: micState.mime }),
+      });
+      if (tr.ok) {
+        const trBody = await tr.json();
+        const text = trBody.transcript || '';
+        if (text) {
+          // Fill whichever prompt/command field is visible on the active panel
+          ['cmd_text', 'prompt', 'from_prompt'].forEach(id => setField(id, text));
+          micState.transcript = text;
+          if (status) status.textContent = `✓ ${micState.durationSec}s — "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}"`;
+        } else {
+          if (status) status.textContent = `✓ ${micState.durationSec}s recorded — voice input ready`;
+        }
+      } else {
+        if (status) status.textContent = `✓ ${micState.durationSec}s recorded — transcription failed, will retry on send`;
+      }
+    } catch(_e) {
+      if (status) status.textContent = `✓ ${micState.durationSec}s recorded — voice input ready`;
+    }
+  };
+  micState.recorder.start(200);
+  micState.durationSec = 0;
+  const btn = $id('btn-mic');
+  const status = $id('mic-status');
+  if (btn) { btn.className = 'mic-btn recording'; btn.innerHTML = '<span class="mic-dot"></span>Stop'; }
+  if (status) { status.style.color = 'var(--red)'; status.textContent = 'Recording… 0s'; }
+  micState.timer = setInterval(() => {
+    micState.durationSec++;
+    const s = $id('mic-status');
+    if (s) s.textContent = `Recording… ${micState.durationSec}s`;
+  }, 1000);
+}
+
+function stopRecording() {
+  if (micState.recorder && micState.recorder.state === 'recording') {
+    micState.recorder.stop();
+  }
+  clearInterval(micState.timer);
+}
+
+function clearMic() {
+  stopRecording();
+  micState.blob = null; micState.mime = ''; micState.durationSec = 0;
+  const btn = $id('btn-mic');
+  const status = $id('mic-status');
+  const clearBtn = $id('btn-mic-clear');
+  if (btn) { btn.className = 'mic-btn'; btn.innerHTML = '🎤 Record'; }
+  if (status) { status.textContent = 'not recording'; status.style.color = 'var(--muted)'; }
+  if (clearBtn) clearBtn.style.display = 'none';
+}
+
+// ── Template store helpers ────────────────────────────────
+const _LETTER_TYPE_TO_TMPL = {
+  'service_letter':   'tmpl_svc_001',
+  'goi_letter':       'tmpl_goi_001',
+  'do_letter':        'tmpl_do_001',
+  'movement_order':   'tmpl_mov_001',
+  'leave_certificate':'tmpl_leave_001',
+  'invitation_letter':'tmpl_inv_001',
+};
+
+function useTemplate(templateId, letterType) {
+  // Navigate to New from Template panel — saved letterhead + signee carried over,
+  // AI fills subject/body from the prompt the user types.
+  loadPanel('fromTemplate');
+  setTimeout(() => setField('from_tpl_id', templateId), 50);
+}
+
+async function deleteTemplate(templateId, btnEl) {
+  if (!confirm(`Delete template ${templateId}?`)) return;
+  try {
+    const r = await fetch(`${base()}/saved-templates/${encodeURIComponent(templateId)}`, { method:'DELETE' });
+    if (r.ok) {
+      btnEl.closest('tr').remove();
+    } else {
+      alert(`Delete failed: ${r.status}`);
+    }
+  } catch(e) {
+    alert(`Delete error: ${e}`);
+  }
+}
+
+async function loadDoc(docId, docType) {
+  // Load a recent doc into global state, fetching current version numbers.
+  state.docId = docId;
+  state.docType = docType;
+  state.version = null;
+  state.docengineVersion = null;
+  renderStateBar();
+  try {
+    const r = await fetch(`${base()}/documents/${docId}`);
+    if (r.ok) {
+      const d = await r.json();
+      if (d.current_version_id != null) state.version = d.current_version_id;
+      if (d.docengine_version    != null) state.docengineVersion = d.docengine_version;
+      if (d.doc_version          != null) state.docRev = d.doc_version;
+      renderStateBar();
+    }
+  } catch(_) {}
+  // Refresh auto-filled fields on whichever panel is currently open.
+  setField('doc_id', docId);
+  setField('version', state.version ?? '');
+  setField('dl_rev', state.docRev != null ? `v${state.docRev}` : (state.version ?? ''));
+}
+
+function showWarnings(warnings) {
+  const el = $id('resp-parsed');
+  const div = document.createElement('div');
+  div.className = 'warn-banner visible';
+  div.textContent = '⚠ ' + warnings.join(' | ');
+  el.insertBefore(div, el.firstChild);
+}
+
+function switchTab(btn, tab) {
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // tab switching is visual; both divs live in DOM
+  const parsedEl = $id('tab-parsed');
+  const rawEl    = $id('resp-body');
+  if (parsedEl) parsedEl.style.display = tab === 'parsed' ? '' : 'none';
+  if (rawEl)    rawEl.style.display    = tab === 'raw'    ? '' : 'none';
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════════════════
+// PANEL RENDERER
+// ═══════════════════════════════════════════════════════════
+let currentPanel = null;
+
+function loadPanel(name) {
+  const panel = panels[name];
+  if (!panel) return;
+  currentPanel = name;
+
+  // update sidebar active
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.panel === name);
+  });
+
+  // update header
+  $id('panel-title').textContent = panel.title;
+  $id('panel-path').textContent  = panel.path;
+  const mEl = $id('panel-method');
+  mEl.textContent  = panel.method;
+  const methodClass = { GET:'badge-get', POST:'badge-post', PATCH:'badge-patch' }[panel.method] || 'badge-post';
+  mEl.className    = 'method-badge ' + methodClass;
+
+  // build request form
+  const pane = $id('req-pane');
+  pane.innerHTML = '';
+
+  (panel.fields || []).forEach(field => {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    const hintHtml = field.hint ? `<span class="hint">— ${field.hint}</span>` : '';
+    const reqHtml  = field.required ? '<span class="required">*</span>' : '';
+    group.innerHTML = `<label class="field-label" for="${field.id}">${field.label}${reqHtml}${hintHtml}</label>`;
+
+    if (field.type === 'select') {
+      const sel = document.createElement('select');
+      sel.id = field.id;
+      (field.options || []).forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt; o.textContent = opt;
+        sel.appendChild(o);
+      });
+      group.appendChild(sel);
+    } else if (field.type === 'textarea') {
+      const ta = document.createElement('textarea');
+      ta.id = field.id;
+      ta.className = field.tall ? 'tall' : '';
+      ta.placeholder = field.placeholder || '';
+      ta.rows = 4;
+      group.appendChild(ta);
+    } else {
+      const inp = document.createElement('input');
+      inp.type = field.type || 'text';
+      inp.id   = field.id;
+      inp.placeholder = field.placeholder || '';
+      if (field.default != null) inp.value = field.default;
+      if (field.accept) inp.accept = field.accept;
+      group.appendChild(inp);
+    }
+    pane.appendChild(group);
+  });
+
+  // quick prompts
+  if (panel.quickPrompts?.length) {
+    const qg = document.createElement('div');
+    qg.className = 'form-group';
+    qg.innerHTML = `<label class="field-label">Quick fill</label><div class="chips" id="quick-chips"></div>`;
+    pane.appendChild(qg);
+    const chips = qg.querySelector('#quick-chips');
+    panel.quickPrompts.forEach(qp => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = qp[0];
+      chip.onclick = () => {
+        if (qp.length === 3) {
+          setField('doc_type', qp[1]);
+          setField('prompt',   qp[2]);
+        } else {
+          setField('prompt',   qp[1]);
+        }
+      };
+      chips.appendChild(chip);
+    });
+  }
+
+  // clear response
+  $id('resp-body').textContent = '— no response yet —';
+  $id('resp-body').style.display = '';
+  $id('resp-parsed').innerHTML = '';
+  $id('resp-status').textContent = '';
+  $id('resp-status').className = '';
+  $id('resp-time').textContent = '';
+
+  // call onMount for auto-filling from state
+  if (panel.onMount) panel.onMount();
+}
+
+function collectFields() {
+  const panel = panels[currentPanel];
+  const result = {};
+  (panel.fields || []).forEach(field => {
+    const el = $id(field.id);
+    if (el) result[field.id] = el.value;
+  });
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SEND BUTTON
+// ═══════════════════════════════════════════════════════════
+$id('btn-send').addEventListener('click', async () => {
+  const panel = panels[currentPanel];
+  if (!panel) return;
+
+  const btn = $id('btn-send');
+  const spin = $id('spinner');
+  btn.disabled = true;
+  spin.classList.add('visible');
+
+  // clear response
+  $id('resp-body').textContent = '';
+  $id('resp-parsed').innerHTML = '';
+  $id('resp-status').textContent = '';
+  $id('resp-time').textContent = '';
+
+  try {
+    const fields = collectFields();
+    const data   = await panel.execute(fields);
+
+    // show status
+    const sEl = $id('resp-status');
+    sEl.textContent = data.status || 0;
+    if (data._ok) {
+      sEl.className = 'status-ok';
+    } else if (data.status >= 400 && data.status < 500) {
+      sEl.className = 'status-warn';
+    } else {
+      sEl.className = 'status-err';
+    }
+    $id('resp-time').textContent = `${data._ms}ms`;
+
+    // show raw JSON
+    const rawEl = $id('resp-body');
+    rawEl.textContent = JSON.stringify(data.body, null, 2);
+
+    // show parsed view
+    if (panel.renderResponse && data._ok) {
+      $id('resp-parsed').innerHTML = '';
+      panel.renderResponse(data);
+    }
+
+    // clear prompt/command fields on success so user can type the next command
+    if (data._ok && panel.clearOnSuccess) {
+      panel.clearOnSuccess.forEach(id => setField(id, ''));
+      clearMic();  // also reset any pending recording
+    }
+
+  } finally {
+    btn.disabled = false;
+    spin.classList.remove('visible');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR NAV
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.sidebar-item').forEach(el => {
+  el.addEventListener('click', () => loadPanel(el.dataset.panel));
+});
+
+// ═══════════════════════════════════════════════════════════
+// HEALTH CHECK — runs on load and every 30s
+// ═══════════════════════════════════════════════════════════
+async function checkHealth() {
+  try {
+    const r = await fetch(base() + '/health', { signal: AbortSignal.timeout(4000) });
+    const dot = $id('health-dot');
+    const lbl = $id('health-label');
+    if (r.ok) {
+      dot.className = 'ok';
+      const j = await r.json();
+      lbl.textContent = `OK · ${j.env || 'backend'}`;
+    } else {
+      dot.className = 'err';
+      lbl.textContent = `${r.status} error`;
+    }
+  } catch {
+    $id('health-dot').className = 'err';
+    $id('health-label').textContent = 'unreachable';
+  }
+}
+checkHealth();
+setInterval(checkHealth, 30_000);
+
+// ── Boot ─────────────────────────────────────────────────
+loadPanel('health');
+</script>
+</body>
+</html>

@@ -1,0 +1,632 @@
+{
+  "cases": [
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Add paragraph after paragrph 1 with Additional compliance sentence.",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Add another paragrph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Remove paragrph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Add seciton after body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Delete seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Move seciton body 2 befor body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 0
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Move seciton body 1 aftr body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001",
+        "target_anchor_section_id": "sec_body_002",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Move seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Move section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Delete section",
+      "context": {
+        "current_section_id": null,
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Add paragraph after paragrph 1 with Additional compliance sentence.",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Add another paragrph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Remove paragrph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Add seciton after body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Delete seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Move seciton body 2 befor body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 0
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Move seciton body 1 aftr body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001",
+        "target_anchor_section_id": "sec_body_002",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Move seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Move section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Delete section",
+      "context": {
+        "current_section_id": null,
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Add paragraph after paragrph 1 with Additional compliance sentence.",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Add another paragrph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Remove paragrph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Add seciton after body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Delete seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Move seciton body 2 befor body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 0
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Move seciton body 1 aftr body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001",
+        "target_anchor_section_id": "sec_body_002",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Move seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Move section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Delete section",
+      "context": {
+        "current_section_id": null,
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Add paragraph after paragrph 1 with Additional compliance sentence.",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Add another paragrph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Remove paragrph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "scope": "PARAGRAPH",
+        "target_section_id": "sec_body_001",
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Add seciton after body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Delete seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Move seciton body 2 befor body 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 0
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Move seciton body 1 aftr body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_001",
+        "target_anchor_section_id": "sec_body_002",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Move seciton body 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": false,
+        "scope": "SECTION",
+        "target_section_id": "sec_body_002",
+        "target_anchor_section_id": "sec_body_001",
+        "target_position_idx": 1
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Move section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Delete section",
+      "context": {
+        "current_section_id": null,
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": true,
+        "scope": "SECTION"
+      }
+    }
+  ]
+}

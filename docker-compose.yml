@@ -1,0 +1,79 @@
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: docai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  doc-engine:
+    build:
+      context: ../smartclerk-backend-docengine-main
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://smartclerk:smartclerk@postgres:5432/smartclerk_de
+      APP_NAME: Smart Clerk Doc-Engine
+      DEBUG: "false"
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ml-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/docai
+      STORAGE_DIR: /app/storage
+      DATA_DIR: /app/data
+      LLM_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_CHAT_MODEL: llama3.1:8b
+      OLLAMA_TEMPERATURE: "0.2"
+      EMBED_PROVIDER: fastembed
+      EMBEDDING_DIM: "384"
+      LIBREOFFICE_BIN: soffice
+      AUTO_BOOTSTRAP: "true"
+      ENABLE_COMMAND_API: "true"
+      ENABLE_VOICE_INPUT: "true"
+      COMMAND_INTENT_USE_LLM: "true"
+      COMMAND_TRANSFORM_USE_LLM: "true"
+      DOCENGINE_ENABLED: "true"
+      DOCENGINE_URL: http://doc-engine:8001
+      RULEBOOK_FILENAME: rulebook.pdf
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      doc-engine:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+      - surya_model_cache:/root/.cache/datalab
+      - fastembed_cache:/root/.cache/fastembed
+
+volumes:
+  pgdata:
+  surya_model_cache:
+  fastembed_cache:

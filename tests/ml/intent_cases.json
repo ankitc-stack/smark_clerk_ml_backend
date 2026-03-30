@@ -1,0 +1,3694 @@
+{
+  "cases": [
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make para 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rephrase paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand para 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 3 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make this formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make here concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make it formal please",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "दूसरा paragraph concise करो",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Shorten para 2 to two lines",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Rewrite para 2 but keep meaning",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Expand p3 with one more line",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make para 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rephrase paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand para 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 3 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make paragraph formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make this formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make here concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Make it formal please",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "दूसरा paragraph concise करो",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Shorten para 2 to two lines",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Rewrite para 2 but keep meaning",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Expand p3 with one more line",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make para 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rephrase paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand para 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 3 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make this formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make here concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make it formal please",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "दूसरा paragraph concise करो",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Shorten para 2 to two lines",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Rewrite para 2 but keep meaning",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Expand p3 with one more line",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make para 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rephrase paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand para 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 3 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make para 2 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rephrase paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 2 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 3 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make para 1 formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rephrase paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 0
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 1
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph 1 concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make paragraph formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make this formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make here concise",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make it formal",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make it formal please",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": null
+      },
+      "expected": {
+        "action": "CHANGE_TONE",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "दूसरा paragraph concise करो",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shorten para 2 to two lines",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "SHORTEN_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Rewrite para 2 but keep meaning",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 2
+      },
+      "expected": {
+        "action": "REWRITE_CONTENT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Expand p3 with one more line",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 3
+      },
+      "expected": {
+        "action": "EXPAND_CONTENT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make paragraph 1 bold",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Make para 2 italic",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Highlight paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Underline paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Make paragraph 2 bold",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "font size 14 for paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Make para 1 bold",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Underline para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "SET_FORMAT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Add a new paragraph after paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Insert a new paragraph after para 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Add another paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Append a new paragraph after para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Add paragraph after paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Insert a new paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Add a new paragraph after para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Append another paragraph",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "ADD_PARAGRAPH",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Remove paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Delete paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Remove para 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Delete para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Remove paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Delete paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Remove para 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Delete para 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "REMOVE_PARAGRAPH",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Delete the last sentence from paragraph 2",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 20
+      },
+      "expected": {
+        "action": "DELETE_TEXT",
+        "clarify": false,
+        "target_para_id": "p2"
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Delete this line from paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "DELETE_TEXT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Delete this text from paragraph 3",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 30
+      },
+      "expected": {
+        "action": "DELETE_TEXT",
+        "clarify": false,
+        "target_para_id": "p3"
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Delete the first sentence in paragraph 1",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 10
+      },
+      "expected": {
+        "action": "DELETE_TEXT",
+        "clarify": false,
+        "target_para_id": "p1"
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Insert a new section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Add a new section after this one",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Add a section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Insert a section after this",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "INSERT_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Delete this section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Remove this section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Delete section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Remove section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "DELETE_SECTION",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Move this section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Reorder this section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Move section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Shift this section",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "MOVE_SECTION",
+        "clarify": true
+      }
+    },
+    {
+      "doc_type": "GOI_LETTER",
+      "prompt": "Undo",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "UNDO",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "DO_LETTER",
+      "prompt": "Undo last edit",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "UNDO",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "MOVEMENT_ORDER",
+      "prompt": "Revert",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "UNDO",
+        "clarify": false
+      }
+    },
+    {
+      "doc_type": "LEAVE_CERTIFICATE",
+      "prompt": "Go back",
+      "context": {
+        "current_section_id": "sec_body_001",
+        "selected_section_ids": [],
+        "cursor_position": 5
+      },
+      "expected": {
+        "action": "UNDO",
+        "clarify": false
+      }
+    },
+    {"doc_type":"GOI_LETTER","prompt":"Make paragraph 1 formal","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":10},"expected":{"action":"CHANGE_TONE","clarify":false,"target_para_id":"p1"}},
+    {"doc_type":"GOI_LETTER","prompt":"Make paragraph 2 formal","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":20},"expected":{"action":"CHANGE_TONE","clarify":false,"target_para_id":"p2"}},
+    {"doc_type":"DO_LETTER","prompt":"Rewrite paragraph 1","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":10},"expected":{"action":"REWRITE_CONTENT","clarify":false,"target_para_id":"p1"}},
+    {"doc_type":"DO_LETTER","prompt":"Rewrite paragraph 3","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":30},"expected":{"action":"REWRITE_CONTENT","clarify":false,"target_para_id":"p3"}},
+    {"doc_type":"GOI_LETTER","prompt":"Shorten paragraph 2","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":20},"expected":{"action":"SHORTEN_CONTENT","clarify":false,"target_para_id":"p2"}},
+    {"doc_type":"MOVEMENT_ORDER","prompt":"Expand paragraph 1","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":5},"expected":{"action":"EXPAND_CONTENT","clarify":false,"target_para_id":"p1"}},
+    {"doc_type":"DO_LETTER","prompt":"Remove paragraph 3","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":30},"expected":{"action":"REMOVE_PARAGRAPH","clarify":false,"target_para_id":"p3"}},
+    {"doc_type":"LEAVE_CERTIFICATE","prompt":"Delete paragraph 2","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":20},"expected":{"action":"REMOVE_PARAGRAPH","clarify":false,"target_para_id":"p2"}},
+    {"doc_type":"GOI_LETTER","prompt":"Make paragraph 1 bold","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":10},"expected":{"action":"SET_FORMAT","clarify":false,"target_para_id":"p1"}},
+    {"doc_type":"DO_LETTER","prompt":"Expand paragraph 1","context":{"current_section_id":null,"selected_section_ids":[],"cursor_position":5},"expected":{"action":"EXPAND_CONTENT","clarify":false,"target_para_id":"p1"}}
+  ]
+}
