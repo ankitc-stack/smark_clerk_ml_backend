@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
-from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, JSON
+import uuid
+from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, JSON, Float, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 from app.db import Base
@@ -60,3 +61,59 @@ class DocumentVersion(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     document = relationship("Document", backref="versions")
+
+
+# ── Logging / observability tables ────────────────────────────────────────────
+
+class RequestLog(Base):
+    __tablename__ = "request_logs"
+    id          = mapped_column(String(40), primary_key=True, default=lambda: uuid.uuid4().hex)
+    endpoint    = mapped_column(String(128), nullable=False, index=True)
+    user_id     = mapped_column(String(80),  nullable=True,  index=True)
+    doc_id      = mapped_column(String(40),  nullable=True,  index=True)
+    doc_type    = mapped_column(String(64),  nullable=True)
+    prompt      = mapped_column(Text,        nullable=True)
+    status      = mapped_column(String(32),  nullable=True)   # applied|error|needs_clarification
+    status_code = mapped_column(Integer,     nullable=True)
+    latency_ms  = mapped_column(Integer,     nullable=True)
+    extra       = mapped_column(JSON,        nullable=True)
+    created_at  = mapped_column(DateTime,    default=datetime.utcnow, index=True)
+
+
+class SttLog(Base):
+    __tablename__ = "stt_logs"
+    id         = mapped_column(String(40), primary_key=True, default=lambda: uuid.uuid4().hex)
+    request_id = mapped_column(String(40), nullable=True, index=True)
+    user_id    = mapped_column(String(80), nullable=True, index=True)
+    doc_id     = mapped_column(String(40), nullable=True)
+    source     = mapped_column(String(32), nullable=False)   # command_api|stt_endpoint
+    transcript = mapped_column(Text,       nullable=True)
+    mime_type  = mapped_column(String(64), nullable=True)
+    stt_model  = mapped_column(String(64), nullable=True)
+    confidence = mapped_column(Float,      nullable=True)
+    latency_ms = mapped_column(Integer,    nullable=True)
+    succeeded  = mapped_column(Boolean,    nullable=False, default=True)
+    created_at = mapped_column(DateTime,   default=datetime.utcnow, index=True)
+
+
+class WakeWordLog(Base):
+    __tablename__ = "wake_word_logs"
+    id         = mapped_column(String(40), primary_key=True, default=lambda: uuid.uuid4().hex)
+    event      = mapped_column(String(16), nullable=False, index=True)  # activate|deactivate
+    method     = mapped_column(String(16), nullable=True)               # whisper|oww
+    score      = mapped_column(Float,      nullable=True)
+    transcript = mapped_column(Text,       nullable=True)
+    created_at = mapped_column(DateTime,   default=datetime.utcnow, index=True)
+
+
+class ErrorLog(Base):
+    __tablename__ = "error_logs"
+    id         = mapped_column(String(40), primary_key=True, default=lambda: uuid.uuid4().hex)
+    endpoint   = mapped_column(String(128), nullable=True, index=True)
+    error_type = mapped_column(String(64),  nullable=True, index=True)
+    error_code = mapped_column(String(64),  nullable=True)
+    message    = mapped_column(Text,        nullable=True)
+    user_id    = mapped_column(String(80),  nullable=True)
+    doc_id     = mapped_column(String(40),  nullable=True)
+    request_id = mapped_column(String(40),  nullable=True)
+    created_at = mapped_column(DateTime,    default=datetime.utcnow, index=True)

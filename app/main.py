@@ -675,6 +675,7 @@ async def command_document(document_id: str, req: CommandRequest, db: Session = 
         error_code: str | None = None,
         reason_code: str | None = None,
     ) -> None:
+        lat = _latency_payload()
         _emit_command_log(
             request_id=request_id,
             document_id=document_id,
@@ -685,10 +686,42 @@ async def command_document(document_id: str, req: CommandRequest, db: Session = 
             prompt_version=prompt_version,
             repair_applied=repair_applied,
             transform_meta=transform_meta,
-            latency_ms=_latency_payload(),
+            latency_ms=lat,
             error_code=error_code,
             reason_code=reason_code,
         )
+        from app.services.log_collector import log_request, log_stt, log_error
+        log_request(
+            endpoint="/documents/command",
+            user_id=str(doc.user_id) if doc else None,
+            doc_id=document_id,
+            doc_type=str(doc.doc_type) if doc else None,
+            prompt=prompt,
+            status=status,
+            latency_ms=lat.get("total_ms"),
+            extra={"intent_source": intent_source, "error_code": error_code},
+        )
+        if input_source == "voice" and stt_meta:
+            log_stt(
+                request_id=request_id,
+                user_id=str(doc.user_id) if doc else None,
+                doc_id=document_id,
+                source="command_api",
+                transcript=transcript,
+                stt_model=stt_meta.get("stt_model"),
+                confidence=stt_meta.get("stt_confidence"),
+                latency_ms=stt_meta.get("stt_latency_ms"),
+                succeeded=(status != "error"),
+            )
+        if status == "error" and error_code:
+            log_error(
+                endpoint="/documents/command",
+                error_code=error_code,
+                error_type=error_code,
+                user_id=str(doc.user_id) if doc else None,
+                doc_id=document_id,
+                request_id=request_id,
+            )
 
     def _error(
         *,
@@ -2580,6 +2613,16 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
             logging.warning("Blueprint plain render failed for %s: %s", doc_id, _plain_exc)
             db.rollback()
 
+    from app.services.log_collector import log_request
+    log_request(
+        endpoint="/documents/generate",
+        user_id=req.user_id,
+        doc_id=doc_id,
+        doc_type=de_resp.get("document_type"),
+        prompt=req.prompt,
+        status="applied",
+        status_code=200,
+    )
     return BlueprintDocResponse(
         document_id=doc_id,
         docengine_doc_id=str(de_resp["document_id"]),
@@ -2729,13 +2772,19 @@ async def stt_transcribe(req: _TranscribeRequest):
     """
     import base64 as _b64
     from app.services.stt import transcribe as _transcribe, STTError
+    from app.services.log_collector import log_stt, log_error
     try:
         audio_bytes = _b64.b64decode(req.audio_base64, validate=True)
         transcript, meta = _transcribe(audio_bytes=audio_bytes, mime_type=req.mime_type)
+        log_stt(source="stt_endpoint", transcript=transcript, mime_type=req.mime_type,
+                stt_model=meta.get("stt_model"), confidence=meta.get("stt_confidence"),
+                latency_ms=meta.get("stt_latency_ms"), succeeded=True)
         return {"transcript": transcript, **meta}
     except STTError as exc:
+        log_error(endpoint="/stt/transcribe", error_type=type(exc).__name__, message=str(exc))
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:
+        log_error(endpoint="/stt/transcribe", error_type=type(exc).__name__, message=str(exc))
         raise HTTPException(status_code=500, detail=f"Transcription failed: {exc}")
 
 
@@ -3659,7 +3708,7 @@ def _ww_transcribe(pcm_int16_bytes: bytes, sample_rate: int = 16000) -> str:
             tf.write(buf.getvalue())
             tmp_path = tf.name
         segs, _ = model.transcribe(
-            tmp_path, beam_size=1, vad_filter=False,
+            tmp_path, beam_size=1, vad_filter=True,
             initial_prompt="start clerk over clerk",   # bias towards expected words
         )
         return " ".join((getattr(s, "text", "") or "").strip() for s in segs).strip()
@@ -3732,34 +3781,50 @@ async def wake_word_ws(websocket: WebSocket):
     _last_event: str = ""
     _chunks_received = 0
     _whisper_running = False   # guard: skip new runs while previous is in flight
+    _session_gen = 0           # incremented on every activate/deactivate; stale tasks self-discard
 
-    _CLERK = {"clerk", "clear", "click", "class", "cleric", "clerc",
-              "clerke", "clerico", "clock", "clack", "clark", "klerk"}
+    # Clerk variants: Indian-English mishearings of "clerk" by tiny.en
+    # "clear" removed — too common in normal speech, causes false deactivate
+    _CLERK = {"clerk", "click", "cleric", "clerc", "clerke", "clerico",
+              "clock", "clack", "clark", "klerk", "class"}
 
-    async def _run_whisper(pcm_bytes: bytes) -> None:
-        nonlocal _whisper_running, _last_event, audio_buf, buf_samples, stride_accum
+    async def _run_whisper(pcm_bytes: bytes, gen: int) -> None:
+        nonlocal _whisper_running, _last_event, audio_buf, buf_samples, stride_accum, _session_gen
         try:
             loop = asyncio.get_event_loop()
             text = await loop.run_in_executor(None, lambda b=pcm_bytes: _ww_transcribe(b))
+            # Discard result if a newer activate/deactivate fired while we were transcribing
+            if gen != _session_gen:
+                return
             text = text.lower().strip()
+            words = text.split()
             if text:
                 _ww_log.info("wake_word[whisper]: transcript %r", text)
-            _has_clerk = any(w in text.split() or w in text for w in _CLERK)
+            # Only match short command-like utterances (≤ 8 words) to avoid false matches in speech
+            if len(words) > 8:
+                return
+            _has_clerk = any(w in words or w in text for w in _CLERK)
             _has_start = any(w in text for w in ("start", "chart", "stark"))
-            _has_over  = any(w in text for w in ("over", "voter", "ober", "uber"))
+            _has_over  = any(w in words for w in ("over",))   # exact word only — "over" is unambiguous
             if _has_start and _has_clerk and _last_event != "activate":
                 _ww_log.info("wake_word[whisper]: activate")
                 _last_event = "activate"
+                _session_gen += 1
                 audio_buf.clear()
                 buf_samples = 0
                 stride_accum = 0
+                from app.services.log_collector import log_wake_word
+                log_wake_word(event="activate", method="whisper", score=1.0, transcript=text)
                 await websocket.send_json({"event": "activate", "score": 1.0, "method": "whisper"})
             elif _has_over and _has_clerk and _last_event != "deactivate":
                 _ww_log.info("wake_word[whisper]: deactivate")
                 _last_event = "deactivate"
+                _session_gen += 1
                 audio_buf.clear()
                 buf_samples = 0
                 stride_accum = 0
+                from app.services.log_collector import log_wake_word
+                log_wake_word(event="deactivate", method="whisper", score=1.0, transcript=text)
                 await websocket.send_json({"event": "deactivate", "score": 1.0, "method": "whisper"})
         except Exception as _stt_err:
             _ww_log.warning("wake_word[whisper]: error — %s", _stt_err)
@@ -3817,7 +3882,7 @@ async def wake_word_ws(websocket: WebSocket):
 
             _whisper_running = True
             pcm_bytes = np.concatenate(audio_buf).astype(np.int16).tobytes()
-            asyncio.create_task(_run_whisper(pcm_bytes))
+            asyncio.create_task(_run_whisper(pcm_bytes, _session_gen))
 
     except WebSocketDisconnect:
         _ww_log.info("wake_word: client disconnected")
