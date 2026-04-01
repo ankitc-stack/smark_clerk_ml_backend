@@ -294,6 +294,42 @@
   }
   .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+  /* ── Wake-word panel ─────────────────────────────────── */
+  .badge-ws { background: rgba(34,197,94,.15); color: var(--green); }
+  .ww-light {
+    width: 90px; height: 90px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: var(--border); color: var(--muted);
+    transition: background .4s, box-shadow .4s, color .4s;
+    margin: 0 auto;
+  }
+  .ww-light.active   { background: var(--green); color: #fff; box-shadow: 0 0 32px rgba(34,197,94,.5); }
+  .ww-light.deactive { background: var(--red);   color: #fff; box-shadow: 0 0 32px rgba(248,113,113,.5); }
+  .ww-log { max-height: 340px; overflow-y: auto; margin-top: 4px; }
+  .ww-entry {
+    display: flex; gap: 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+  }
+  .ww-ts   { color: var(--muted); flex-shrink: 0; }
+  .ww-evt  { font-weight: 700; min-width: 80px; }
+  .ww-evt.activate   { color: var(--green); }
+  .ww-evt.deactivate { color: var(--red); }
+  .ww-evt.score      { color: var(--yellow); }
+  .ww-evt.info       { color: var(--muted); }
+  .ww-detail { color: #a5b4c8; }
+  .ww-btn {
+    width: 100%; padding: 8px 0; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); transition: all .2s; margin-bottom: 8px;
+  }
+  .ww-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ww-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .ww-btn.active-btn { background: rgba(34,197,94,.15); border-color: var(--green); color: var(--green); }
+  .ww-btn.stop-btn   { background: rgba(248,113,113,.12); border-color: var(--red); color: var(--red); }
+
   /* ── Scrollbar ─────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -425,6 +461,13 @@
     <div class="sidebar-group-label">Feedback</div>
     <div class="sidebar-item" data-panel="rateFeedback">
       <span class="method-badge badge-post">POST</span>/feedback
+    </div>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-group-label">Voice</div>
+    <div class="sidebar-item" data-panel="wake-word">
+      <span class="method-badge badge-ws">WS</span>/ws/wake-word
     </div>
   </div>
 
@@ -1172,6 +1215,41 @@ const panels = {
     },
   },
 
+  // ── Wake Word ────────────────────────────────────────────
+  'wake-word': {
+    title: 'Wake Word Detection', method: 'WS', path: '/ws/wake-word',
+    noSend: true,
+    fields: [],
+    onMount() {
+      // Request pane: status light + buttons
+      $id('req-pane').innerHTML = `
+        <div style="text-align:center;padding:24px 0 16px">
+          <div class="ww-light" id="ww-light">IDLE</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--muted)" id="ww-state-label">Not connected</div>
+        </div>
+        <button class="ww-btn" id="ww-conn-btn" onclick="wwToggleConnect()">Connect</button>
+        <button class="ww-btn" id="ww-mic-btn" onclick="wwToggleMic()" disabled>Start Mic</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6">
+          1. Click <b>Connect</b> to open WebSocket<br>
+          2. Click <b>Start Mic</b> to stream microphone<br>
+          3. Say <b>"start clerk"</b> → green light<br>
+          4. Say <b>"over clerk"</b> → red light
+        </div>
+      `;
+      // Response pane: live event log
+      $id('resp-body').style.display = 'none';
+      $id('resp-parsed').innerHTML = `
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Event Log</div>
+        <div class="ww-log" id="ww-log"></div>
+      `;
+    },
+    onUnmount() {
+      wwDisconnect();
+      $id('resp-body').style.display = '';
+    },
+    execute() { return Promise.resolve({ _ok:true, status:0, body:{}, _ms:0 }); },
+  },
+
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -1327,6 +1405,13 @@ function appendDownloadLink(docId, versionId, rev) {
   el.appendChild(a);
 }
 
+// ── Wake-word WebSocket state ─────────────────────────────
+let _wwWs    = null;   // WebSocket instance
+let _wwCtx   = null;   // AudioContext
+let _wwProc  = null;   // ScriptProcessorNode
+let _wwStream= null;   // MediaStream
+let _wwMicOn = false;
+
 // ── Mic / voice recording ─────────────────────────────────
 const micState = { blob: null, mime: '', durationSec: 0, stream: null, recorder: null, timer: null, chunks: [] };
 
@@ -1446,6 +1531,133 @@ function clearMic() {
   if (clearBtn) clearBtn.style.display = 'none';
 }
 
+// ── Wake-word helpers ─────────────────────────────────────
+
+function wwLog(evtClass, evtLabel, detail) {
+  const log = $id('ww-log');
+  if (!log) return;
+  const t = new Date().toLocaleTimeString('en-GB', { hour12: false });
+  const entry = document.createElement('div');
+  entry.className = 'ww-entry';
+  entry.innerHTML = `<span class="ww-ts">${t}</span><span class="ww-evt ${evtClass}">${evtLabel}</span><span class="ww-detail">${detail}</span>`;
+  log.prepend(entry);
+}
+
+function wwSetLight(state, label) {
+  const el = $id('ww-light');
+  if (!el) return;
+  el.className = 'ww-light' + (state ? ' ' + state : '');
+  el.textContent = label;
+}
+
+function wwSetStatus(text) {
+  const el = $id('ww-state-label');
+  if (el) el.textContent = text;
+}
+
+function wwStopMic() {
+  if (_wwProc)   { try { _wwProc.disconnect(); } catch(_) {} _wwProc = null; }
+  if (_wwCtx)    { try { _wwCtx.close(); }       catch(_) {} _wwCtx = null; }
+  if (_wwStream) { _wwStream.getTracks().forEach(t => t.stop()); _wwStream = null; }
+  _wwMicOn = false;
+  const btn = $id('ww-mic-btn');
+  if (btn) { btn.textContent = 'Start Mic'; btn.className = 'ww-btn'; }
+}
+
+function wwDisconnect() {
+  wwStopMic();
+  if (_wwWs) { try { _wwWs.close(); } catch(_) {} _wwWs = null; }
+  const btn = $id('ww-conn-btn');
+  if (btn) { btn.textContent = 'Connect'; btn.className = 'ww-btn'; }
+  const micBtn = $id('ww-mic-btn');
+  if (micBtn) micBtn.disabled = true;
+  wwSetLight('', 'IDLE');
+  wwSetStatus('Disconnected');
+}
+
+function wwToggleConnect() {
+  if (_wwWs && _wwWs.readyState <= 1) { wwDisconnect(); return; }
+
+  const wsBase = base().replace(/^http/, 'ws');
+  _wwWs = new WebSocket(wsBase + '/ws/wake-word');
+  const btn = $id('ww-conn-btn');
+  if (btn) { btn.textContent = 'Connecting…'; btn.className = 'ww-btn'; btn.disabled = true; }
+  wwSetStatus('Connecting…');
+
+  _wwWs.onopen = () => {
+    if (btn) { btn.textContent = 'Disconnect'; btn.className = 'ww-btn stop-btn'; btn.disabled = false; }
+    const micBtn = $id('ww-mic-btn');
+    if (micBtn) micBtn.disabled = false;
+    wwSetStatus('Connected — say "start clerk"');
+    wwLog('info', 'connected', wsBase + '/ws/wake-word');
+  };
+
+  _wwWs.onmessage = e => {
+    let msg;
+    try { msg = JSON.parse(e.data); } catch(_) { return; }
+    if (msg.event === 'activate') {
+      wwSetLight('active', 'ACTIVE');
+      wwSetStatus('Wake word detected! Say "over clerk" to stop.');
+      wwLog('activate', 'ACTIVATE', `score=${msg.score}  method=${msg.method}`);
+    } else if (msg.event === 'deactivate') {
+      wwStopMic();
+      wwSetLight('deactive', 'OVER');
+      wwSetStatus('Session ended — say "start clerk" to begin again');
+      wwLog('deactivate', 'DEACTIVATE', `score=${msg.score}  method=${msg.method}`);
+    } else if (msg.event === 'score') {
+      wwLog('score', 'score', `start=${msg.start_clerk}  over=${msg.over_clerk}`);
+    }
+  };
+
+  _wwWs.onerror = () => {
+    wwLog('info', 'error', 'WebSocket error');
+    wwSetStatus('Error — check backend');
+  };
+
+  _wwWs.onclose = () => {
+    wwStopMic();
+    if (btn) { btn.textContent = 'Connect'; btn.className = 'ww-btn'; btn.disabled = false; }
+    const micBtn = $id('ww-mic-btn');
+    if (micBtn) micBtn.disabled = true;
+    wwSetLight('', 'IDLE');
+    wwSetStatus('Disconnected');
+    wwLog('info', 'closed', 'connection closed');
+    _wwWs = null;
+  };
+}
+
+async function wwToggleMic() {
+  if (_wwMicOn) { wwStopMic(); return; }
+
+  try {
+    _wwStream = await navigator.mediaDevices.getUserMedia({
+      audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true }
+    });
+  } catch(err) {
+    wwLog('info', 'error', 'Mic access denied: ' + err.message);
+    return;
+  }
+
+  _wwCtx  = new AudioContext({ sampleRate: 16000 });
+  const src = _wwCtx.createMediaStreamSource(_wwStream);
+  _wwProc = _wwCtx.createScriptProcessor(4096, 1, 1);  // ~256ms @ 16kHz (must be power of 2)
+  _wwProc.onaudioprocess = e => {
+    if (!_wwWs || _wwWs.readyState !== WebSocket.OPEN) return;
+    const f32 = e.inputBuffer.getChannelData(0);
+    const i16 = new Int16Array(f32.length);
+    for (let i = 0; i < f32.length; i++)
+      i16[i] = Math.max(-32768, Math.min(32767, f32[i] * 32768));
+    _wwWs.send(i16.buffer);
+  };
+  src.connect(_wwProc);
+  _wwProc.connect(_wwCtx.destination);
+  _wwMicOn = true;
+
+  const btn = $id('ww-mic-btn');
+  if (btn) { btn.textContent = 'Stop Mic'; btn.className = 'ww-btn stop-btn'; }
+  wwLog('info', 'mic', 'streaming started — say "start clerk"');
+}
+
 // ── Template store helpers ────────────────────────────────
 const _LETTER_TYPE_TO_TMPL = {
   'service_letter':   'tmpl_svc_001',
@@ -1528,6 +1740,11 @@ function escHtml(s) {
 let currentPanel = null;
 
 function loadPanel(name) {
+  // Clean up previous panel (e.g. close WS, stop mic stream)
+  if (currentPanel && panels[currentPanel] && panels[currentPanel].onUnmount) {
+    panels[currentPanel].onUnmount();
+  }
+
   const panel = panels[name];
   if (!panel) return;
   currentPanel = name;
@@ -1542,8 +1759,11 @@ function loadPanel(name) {
   $id('panel-path').textContent  = panel.path;
   const mEl = $id('panel-method');
   mEl.textContent  = panel.method;
-  const methodClass = { GET:'badge-get', POST:'badge-post', PATCH:'badge-patch' }[panel.method] || 'badge-post';
+  const methodClass = { GET:'badge-get', POST:'badge-post', PATCH:'badge-patch', WS:'badge-ws' }[panel.method] || 'badge-post';
   mEl.className    = 'method-badge ' + methodClass;
+
+  // hide Send button for WS panels
+  $id('btn-send').style.display = panel.noSend ? 'none' : '';
 
   // build request form
   const pane = $id('req-pane');

@@ -64,11 +64,11 @@ PHRASES = {
 }
 OUTPUT_DIR      = pathlib.Path("data/wake_word_models")
 TRAINING_DIR    = pathlib.Path("data/wake_word_training")
-N_SYNTH_SAMPLES = 500   # synthetic TTS samples per phrase (more = better accuracy)
+N_SYNTH_SAMPLES = 50    # keep small so real recordings dominate (200:1 was killing recall)
 USE_OFFLINE_TTS = True  # True → pyttsx3 (offline); False → gTTS (needs internet)
 SAMPLE_RATE     = 16000
 BATCH_SIZE      = 32
-N_NEG_SAMPLES   = 2000  # noise/silence negative examples
+N_NEG_SAMPLES   = 300   # proportional to small positive set
 
 
 def _check_deps():
@@ -277,7 +277,7 @@ def _train_model(wake_word_name: str, phrase: str):
 
     # auto_train / train_model iterate over DataLoaders yielding (tensor, label).
     # With a small dataset we need a cycling loader so it doesn't exhaust before max_steps.
-    STEPS = 5000  # reduced from 20000 for small synthetic dataset
+    STEPS = 10000  # increased for real + synthetic combined dataset
     BS    = 32
 
     def make_loader(X_arr, y_arr, batch_size=BS, shuffle=False):
@@ -291,15 +291,33 @@ def _train_model(wake_word_name: str, phrase: str):
     fp_val_loader = make_loader(X_neg_val, np.zeros(len(X_neg_val)))
 
     # 7. Train the model
+    # NOTE: auto_train ramps negative_weight from 1→1000 over all steps, which
+    # destroys recall with small datasets (< 500 positives). Use train_model
+    # directly with a constant weight of 1 so positives are never swamped.
     model = Model(input_shape=feature_shape)
-    log.info("  Starting Model.auto_train() (steps=%d) ...", STEPS)
-    model.auto_train(
-        X_train=train_loader,
+    log.info("  Starting Model.train_model() (steps=%d, constant weight) ...", STEPS)
+    val_steps = list(range(STEPS - STEPS // 4, STEPS, max(1, STEPS // 20)))
+    model.train_model(
+        X=train_loader,
         X_val=val_loader,
         false_positive_val_data=fp_val_loader,
-        steps=STEPS,
-        target_fp_per_hour=0.5,
+        max_steps=STEPS,
+        negative_weight_schedule=[1.0] * STEPS,   # constant — no ramp-up that kills recall
+        val_steps=val_steps,
+        warmup_steps=STEPS // 5,
+        hold_steps=STEPS // 3,
+        lr=0.0001,
+        val_set_hrs=11.3,
     )
+    # Pick the checkpoint with best recall
+    if model.best_models:
+        import copy
+        best_idx = max(range(len(model.best_model_scores)),
+                       key=lambda i: model.best_model_scores[i].get("val_recall", 0))
+        model.model = copy.deepcopy(model.best_models[best_idx])
+        s = model.best_model_scores[best_idx]
+        log.info("  Best checkpoint — recall=%.3f  fp/hr=%.2f  accuracy=%.3f",
+                 s.get("val_recall", 0), s.get("val_fp_per_hr", 0), s.get("val_accuracy", 0))
 
     # 8. Export to ONNX
     log.info("  Exporting model to %s ...", out_path)

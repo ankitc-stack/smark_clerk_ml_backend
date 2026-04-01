@@ -119,6 +119,10 @@ async def startup_bootstrap():
         )
     else:
         app.state.docengine = None
+    # Pre-warm the wake-word Whisper model in a background thread so the first
+    # WebSocket connection doesn't incur a 6-second model-load delay.
+    import asyncio as _asyncio
+    _asyncio.get_event_loop().run_in_executor(None, _get_ww_whisper)
 
 
 @app.on_event("shutdown")
@@ -1982,6 +1986,25 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
         # Use the full intent phrase (e.g. "request for additional ration on army day") rather
         # than just the abbreviated subject slot so small models have enough context.
         _body_topic = req.prompt
+        if doc_type_upper == "GENERAL_LETTER":
+            # Strip "bonafide certificate for", "NOC for", "general letter for", etc.
+            # so fallback/LLM gets "Lt Col RS Sharma..." not "bonafide certificate for Lt Col RS Sharma..."
+            _bt = re.sub(
+                r"^(?:write\s+(?:a\s+)?)?(?:bonafide|bona\s*fide|service|clearance|character|experience|noc|no[-\s]objection|attestation)\s+certificate\s+for\s*",
+                "", req.prompt.strip(), flags=re.IGNORECASE,
+            ).strip()
+            # Strip letter-type prefix: "condolence letter to ...", "general letter for ...", etc.
+            # Keep the content after the type keyword so the LLM has full context.
+            _bt = re.sub(
+                r"^(?:write\s+(?:a\s+)?)?(?:condolence|congratulations?|appreciation|appointment|clearance|general|formal|official)\s+letter\s*(?:to|for|about|on|regarding)?\s*",
+                "", _bt, flags=re.IGNORECASE,
+            ).strip()
+            _bt = re.sub(
+                r"^(?:write\s+(?:a\s+)?)?(?:letter|draft\s+(?:a\s+)?letter)\s*(?:for|about|on|regarding)?\s*",
+                "", _bt, flags=re.IGNORECASE,
+            ).strip()
+            if _bt:
+                _body_topic = _bt
         if doc_type_upper in ("DO_LETTER", "GOI_LETTER", "SERVICE_LETTER"):
             _bt = re.sub(
                 r"^(?:write\s+(?:a\s+)?)?(?:service\s+letter|service|do|goi|demi[\s-]official|government\s+of\s+india)\s+letter\s*(?:for|about|to|on|regarding)?\s*",
@@ -2017,7 +2040,20 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
             elif doc_type_upper == "GENERAL_LETTER":
                 from app.ml.slots.general_letter import draft_body_paras_general, needs_to_whomsoever
                 _is_cert = needs_to_whomsoever(req.prompt)
-                body_texts = await draft_body_paras_general(db, _body_topic, is_certificate=_is_cert)
+                # Extract letter type hint from original prompt for LLM sub-type detection
+                _ltype_m = re.match(
+                    r"^(?:write\s+(?:a\s+)?)?"
+                    r"(condolence|congratulations?|appreciation|appointment|clearance|"
+                    r"general|formal|official|noc|bonafide|service|character|experience)\s+letter",
+                    req.prompt.strip(), re.IGNORECASE,
+                )
+                _ltype_hint = _ltype_m.group(1).title() + " Letter" if _ltype_m else ""
+                body_texts = await draft_body_paras_general(
+                    db, _body_topic, is_certificate=_is_cert,
+                    min_paras=2 if _is_cert else 3,
+                    max_paras=3 if _is_cert else 4,
+                    letter_type_hint=_ltype_hint,
+                )
         except Exception:
             import traceback as _tb
             COMMAND_LOGGER.warning("body para draft failed doc_type=%s: %s", doc_type_upper, _tb.format_exc())
@@ -2033,7 +2069,70 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
         # position (order=4, after receiver_block=3) is preserved in the API response.
         # Using "subject" type means "para N" commands won't accidentally target it.
         de_doc_id = str(de_resp["document_id"])
-        if doc_type_upper in ("DO_LETTER", "GOI_LETTER", "SERVICE_LETTER"):
+        _gl_subj_sec_id: str | None = None   # set below for GENERAL_LETTER; checked in 5b to skip duplicate
+        if doc_type_upper == "GENERAL_LETTER" and client is not None:
+            # Insert subject + (optionally) salutation BEFORE body paragraphs so
+            # the final document reads: subject → salutation → para1 → para2
+            _gl_subj_text = (locals().get("slots") or {}).get("subject", "").strip().upper()
+            if _gl_subj_text:
+                try:
+                    _gl_subj_ins = await client.apply_command(de_doc_id, de_ver, {
+                        "action": "INSERT_SECTION", "target_type": "subject",
+                        "target_ref": None,
+                        "position": {"policy": "start"},
+                        "ai_instruction": None,
+                    })
+                    if _gl_subj_ins.get("status") == "applied":
+                        de_ver = _gl_subj_ins.get("version", de_ver)
+                        _gl_subj_sec_id = next(
+                            (u.get("section", {}).get("id") for u in (_gl_subj_ins.get("updates") or [])
+                             if u.get("op") == "insert"), None,
+                        )
+                        if _gl_subj_sec_id:
+                            _lx_subj = text_to_lexical_node(_gl_subj_text, bold=True, underline=True, align="center")
+                            _lx_subj_c = {"richtext": {"format": "lexical", "state": _lx_subj}}
+                            _sp = await client.patch_section(de_doc_id, _gl_subj_sec_id, de_ver, _lx_subj_c)
+                            de_ver = _sp.get("version", de_ver)
+                            doc_data.setdefault("sections", []).append(
+                                {"id": _gl_subj_sec_id, "type": "subject", "content": _lx_subj_c}
+                            )
+                except Exception as _ge:
+                    COMMAND_LOGGER.warning("blueprint fill: GL subject insert failed: %s", _ge)
+            # Salutation for certificates — inserted right after subject
+            from app.ml.slots.general_letter import needs_to_whomsoever as _needs_twic
+            if _needs_twic(req.prompt):
+                try:
+                    _sal_pos = (
+                        {"policy": "after", "section_id": _gl_subj_sec_id}
+                        if _gl_subj_sec_id else {"policy": "start"}
+                    )
+                    _gl_sal_ins = await client.apply_command(de_doc_id, de_ver, {
+                        "action": "INSERT_SECTION", "target_type": "salutation",
+                        "target_ref": None,
+                        "position": _sal_pos,
+                        "ai_instruction": None,
+                    })
+                    if _gl_sal_ins.get("status") == "applied":
+                        de_ver = _gl_sal_ins.get("version", de_ver)
+                        _gl_sal_id = next(
+                            (u.get("section", {}).get("id") for u in (_gl_sal_ins.get("updates") or [])
+                             if u.get("op") == "insert"), None,
+                        )
+                        if _gl_sal_id:
+                            _sal_lx = text_to_lexical_node(
+                                "To Whomsoever It May Concern", bold=True, underline=True, align="center"
+                            )
+                            _sal_c = {"richtext": {"format": "lexical", "state": _sal_lx}}
+                            _sp2 = await client.patch_section(de_doc_id, _gl_sal_id, de_ver, _sal_c)
+                            de_ver = _sp2.get("version", de_ver)
+                            doc_data.setdefault("sections", []).append(
+                                {"id": _gl_sal_id, "type": "salutation", "content": _sal_c}
+                            )
+                            # Make extra para inserts go AFTER the salutation
+                            _last_gen_para_id = _gl_sal_id
+                except Exception as _ge2:
+                    COMMAND_LOGGER.warning("blueprint fill: GL salutation insert failed: %s", _ge2)
+        elif doc_type_upper in ("DO_LETTER", "GOI_LETTER", "SERVICE_LETTER"):
             _subj_text = (slots.get("subject") or "").strip().upper()
             if _subj_text and client is not None:
                 try:
@@ -2242,8 +2341,8 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
         # insert + patch it when we have a subject slot value.
         _has_subject = any(s.get("type") == "subject" for s in (doc_data.get("sections") or []) if isinstance(s, dict))
         _subj_val = (locals().get("slots") or {}).get("subject") or ""
-        # DO_LETTER / GOI_LETTER / SERVICE_LETTER: subject inserted in step 3a — skip duplicate INSERT
-        if not _has_subject and _subj_val and client is not None and doc_type_upper not in ("DO_LETTER", "GOI_LETTER", "SERVICE_LETTER"):
+        # DO_LETTER / GOI_LETTER / SERVICE_LETTER / GENERAL_LETTER: subject inserted in step 3a — skip duplicate INSERT
+        if not _has_subject and _subj_val and client is not None and doc_type_upper not in ("DO_LETTER", "GOI_LETTER", "SERVICE_LETTER", "GENERAL_LETTER"):
             try:
                 # Find receiver_block section ID to insert subject after it
                 _recv_sec_id = next(
@@ -2254,7 +2353,7 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
                 _subj_pos = (
                     {"policy": "after", "section_id": _recv_sec_id}
                     if _recv_sec_id
-                    else {"policy": "after", "section_type": "paragraph"}
+                    else {"policy": "end"}
                 )
                 _ins_subj = await client.apply_command(
                     de_doc_id, de_ver,
@@ -2283,37 +2382,8 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
             except Exception as _e:
                 COMMAND_LOGGER.warning("blueprint fill: subject insert failed: %s", _e)
 
-        # 5c. GENERAL_LETTER certificates: INSERT "To Whomsoever It May Concern" salutation after subject
-        if doc_type_upper == "GENERAL_LETTER" and client is not None:
-            from app.ml.slots.general_letter import needs_to_whomsoever
-            if needs_to_whomsoever(req.prompt):
-                _has_sal = any(s.get("type") == "salutation"
-                               for s in (doc_data.get("sections") or []) if isinstance(s, dict))
-                if not _has_sal:
-                    try:
-                        _sal_ins = await client.apply_command(de_doc_id, de_ver, {
-                            "action": "INSERT_SECTION", "target_type": "salutation",
-                            "target_ref": None,
-                            "position": {"policy": "after", "section_type": "subject"},
-                            "ai_instruction": None,
-                        })
-                        if _sal_ins.get("status") == "applied":
-                            de_ver = _sal_ins.get("version", de_ver)
-                            _sal_id = next(
-                                (u.get("section", {}).get("id") for u in (_sal_ins.get("updates") or [])
-                                 if u.get("op") == "insert"), None,
-                            )
-                            if _sal_id:
-                                _sal_lx = text_to_lexical_node(
-                                    "To Whomsoever It May Concern", bold=True, underline=True, align="center"
-                                )
-                                _sal_c = {"richtext": {"format": "lexical", "state": _sal_lx}}
-                                _sp = await client.patch_section(de_doc_id, _sal_id, de_ver, _sal_c)
-                                de_ver = _sp.get("version", de_ver)
-                                doc_data.setdefault("sections", []).append(
-                                    {"id": _sal_id, "type": "salutation", "content": _sal_c})
-                    except Exception as _e:
-                        COMMAND_LOGGER.warning("blueprint fill: salutation insert failed: %s", _e)
+        # (5c removed — GENERAL_LETTER subject + salutation are now inserted in step 3a,
+        #  before body paragraphs, so the order is subject → salutation → para1 → para2)
 
     # ────────────────────────────────────────────────────────────────────────────
 
@@ -3537,8 +3607,71 @@ async def submit_feedback(doc_id: str, body: FeedbackRequest, db: Session = Depe
 
 _oww_model = None          # lazy singleton — loaded on first WebSocket connection
 _OWW_MODEL_DIR = Path("data/wake_word_models")
-_OWW_THRESHOLD = 0.5       # detection confidence threshold (0–1)
+_OWW_THRESHOLD = 0.95      # OWW model is poorly trained (false-positive scores ~0.4-0.6 on all audio)
+                           # raise threshold to 0.95 to disable OWW path; Whisper handles detection
+_OWW_SCORE_BROADCAST = 0.1 # broadcast raw score to client when above this (debug aid for frontend)
 _OWW_CHUNK_SAMPLES = 1600  # 100 ms at 16 000 Hz
+
+# Use uvicorn's logger so messages appear in docker logs
+_ww_log = logging.getLogger("uvicorn.error")
+
+# Dedicated tiny Whisper model for wake-word keyword spotting.
+# tiny.en: loads in ~6s, transcribes 2s audio in ~0.25s on CPU.
+# The full STT model (large-v3-turbo) takes 74s to load and 7s per inference
+# — far too slow for real-time 1-second keyword detection windows.
+_ww_whisper_model = None
+
+
+def _get_ww_whisper():
+    """Lazy-load the tiny.en Whisper model for wake-word detection."""
+    global _ww_whisper_model
+    if _ww_whisper_model is not None:
+        return _ww_whisper_model
+    try:
+        from faster_whisper import WhisperModel
+        _ww_log.info("wake_word: loading tiny.en Whisper model …")
+        _ww_whisper_model = WhisperModel("tiny.en", device="cpu", compute_type="int8")
+        _ww_log.info("wake_word: tiny.en loaded OK")
+    except Exception as exc:
+        _ww_log.error("wake_word: failed to load tiny.en — %s", exc)
+    return _ww_whisper_model
+
+
+def _ww_transcribe(pcm_int16_bytes: bytes, sample_rate: int = 16000) -> str:
+    """Transcribe raw PCM-16 bytes using tiny.en Whisper — no guardrails.
+
+    Returns transcript text, empty string on silence or error.
+    """
+    import io, wave, tempfile, os
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(pcm_int16_bytes)
+
+    tmp_path = ""
+    try:
+        model = _get_ww_whisper()
+        if model is None:
+            return ""
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
+            tf.write(buf.getvalue())
+            tmp_path = tf.name
+        segs, _ = model.transcribe(
+            tmp_path, beam_size=1, vad_filter=False,
+            initial_prompt="start clerk over clerk",   # bias towards expected words
+        )
+        return " ".join((getattr(s, "text", "") or "").strip() for s in segs).strip()
+    except Exception as exc:
+        _ww_log.warning("wake_word: transcription error — %s", exc)
+        return ""
+    finally:
+        if tmp_path:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
 
 
 def _get_oww():
@@ -3574,38 +3707,108 @@ async def wake_word_ws(websocket: WebSocket):
     Browser sends raw bytes:  Int16Array  (16 kHz, mono, 100 ms = 3200 bytes)
     Server sends JSON events: {"event": "activate"}   — "Start Clerk" detected
                               {"event": "deactivate"} — "Over Clerk"  detected
-                              {"event": "model_unavailable"}  — models not trained yet
+
+    Detection strategy (dual-path):
+    1. openWakeWord ONNX model (fast, zero-latency) when model is trained and scoring above
+       _OWW_THRESHOLD.
+    2. Whisper keyword fallback (reliable, needs ~50 real recordings before OWW trains well)
+       — runs on a rolling 2-second buffer every 1 second.
     """
     import numpy as np
+    import asyncio
 
     await websocket.accept()
-    model = _get_oww()
-    if model is None:
-        await websocket.send_json({"event": "model_unavailable",
-                                   "message": "Wake word models not trained. Run scripts/train_wake_words.py"})
-        await websocket.close()
-        return
+    oww_model = _get_oww()
+    _ww_log.info("wake_word: client connected (oww=%s)", oww_model is not None)
 
-    logging.info("wake_word: client connected %s", websocket.client)
+    # Rolling 2-second audio buffer for Whisper fallback (16 kHz × 2 s = 32 000 samples)
+    _WHISPER_BUF_SAMPLES = 32000
+    _WHISPER_STRIDE      = 8000    # run Whisper every 0.5 s (halved for faster response)
+    audio_buf: list[np.ndarray] = []
+    buf_samples = 0
+    stride_accum = 0
+
+    # Track last event to avoid duplicate fires
+    _last_event: str = ""
+    _chunks_received = 0
+
     try:
         while True:
             chunk = await websocket.receive_bytes()
             if len(chunk) < 2:
                 continue
-            audio = np.frombuffer(chunk, dtype=np.int16).astype(np.float32) / 32768.0
-            preds = model.predict(audio)
-            start_score = float(preds.get("start_clerk", 0))
-            over_score  = float(preds.get("over_clerk",  0))
-            if start_score >= _OWW_THRESHOLD:
-                logging.debug("wake_word: START CLERK detected (score=%.2f)", start_score)
-                await websocket.send_json({"event": "activate",   "score": round(start_score, 3)})
-            elif over_score >= _OWW_THRESHOLD:
-                logging.debug("wake_word: OVER CLERK detected (score=%.2f)", over_score)
-                await websocket.send_json({"event": "deactivate", "score": round(over_score, 3)})
+            _chunks_received += 1
+            if _chunks_received == 1:
+                _ww_log.info("wake_word: first audio chunk received (%d bytes)", len(chunk))
+
+            pcm = np.frombuffer(chunk, dtype=np.int16)
+            float_chunk = pcm.astype(np.float32) / 32768.0
+
+            # ── Path 1: openWakeWord (fast, fires every chunk) ──────────────
+            if oww_model is not None:
+                preds = oww_model.predict(float_chunk)
+                start_score = float(preds.get("start_clerk", 0))
+                over_score  = float(preds.get("over_clerk",  0))
+                # Only fire if not already in that state (dedup: wait for score
+                # to drop below threshold before allowing another fire)
+                if start_score >= _OWW_THRESHOLD and _last_event != "activate":
+                    _ww_log.info("wake_word[oww]: activate (score=%.3f)", start_score)
+                    _last_event = "activate"
+                    await websocket.send_json({"event": "activate", "score": round(start_score, 3), "method": "oww"})
+                    continue
+                elif over_score >= _OWW_THRESHOLD and _last_event != "deactivate":
+                    _ww_log.info("wake_word[oww]: deactivate (score=%.3f)", over_score)
+                    _last_event = "deactivate"
+                    await websocket.send_json({"event": "deactivate", "score": round(over_score, 3), "method": "oww"})
+                    continue
+            # ── Path 2: Whisper keyword fallback (runs every ~0.5 s) ─────────
+            audio_buf.append(pcm)
+            buf_samples  += len(pcm)
+            stride_accum += len(pcm)
+
+            if stride_accum < _WHISPER_STRIDE:
+                continue
+
+            stride_accum = 0
+
+            # Keep last 2 seconds
+            while buf_samples > _WHISPER_BUF_SAMPLES and len(audio_buf) > 1:
+                buf_samples -= len(audio_buf[0])
+                audio_buf.pop(0)
+
+            pcm_bytes = np.concatenate(audio_buf).astype(np.int16).tobytes()
+            try:
+                text = await asyncio.get_event_loop().run_in_executor(
+                    None, lambda b=pcm_bytes: _ww_transcribe(b)
+                )
+                text = text.lower().strip()
+                if text:
+                    _ww_log.info("wake_word[whisper]: transcript %r", text)
+                # Fuzzy match: tiny.en mishears "clerk" as clear/click/class/cleric etc.
+                _CLERK = {"clerk", "clear", "click", "class", "cleric", "clerc",
+                          "clerke", "clerico", "clock", "clack", "clark", "klerk"}
+                _has_clerk = any(w in text.split() or w in text for w in _CLERK)
+                _has_start = any(w in text for w in ("start", "chart", "stark"))
+                _has_over  = any(w in text for w in ("over", "voter", "ober", "uber"))
+                if _has_start and _has_clerk and _last_event != "activate":
+                    _ww_log.info("wake_word[whisper]: activate")
+                    _last_event = "activate"
+                    await websocket.send_json({"event": "activate", "score": 1.0, "method": "whisper"})
+                    audio_buf.clear()
+                    buf_samples = 0
+                elif _has_over and _has_clerk and _last_event != "deactivate":
+                    _ww_log.info("wake_word[whisper]: deactivate")
+                    _last_event = "deactivate"
+                    await websocket.send_json({"event": "deactivate", "score": 1.0, "method": "whisper"})
+                    audio_buf.clear()
+                    buf_samples = 0
+            except Exception as _stt_err:
+                _ww_log.warning("wake_word[whisper]: error — %s", _stt_err)
+
     except WebSocketDisconnect:
-        logging.info("wake_word: client disconnected")
+        _ww_log.info("wake_word: client disconnected")
     except Exception as exc:
-        logging.warning("wake_word: error — %s", exc)
+        _ww_log.warning("wake_word: error — %s", exc)
         try:
             await websocket.close()
         except Exception:
