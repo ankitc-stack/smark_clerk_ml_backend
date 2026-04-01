@@ -3723,7 +3723,7 @@ async def wake_word_ws(websocket: WebSocket):
 
     # Rolling 2-second audio buffer for Whisper fallback (16 kHz × 2 s = 32 000 samples)
     _WHISPER_BUF_SAMPLES = 32000
-    _WHISPER_STRIDE      = 8000    # run Whisper every 0.5 s (halved for faster response)
+    _WHISPER_STRIDE      = 16000   # run Whisper every 1 s (prevent backlog on slow CPU)
     audio_buf: list[np.ndarray] = []
     buf_samples = 0
     stride_accum = 0
@@ -3731,6 +3731,40 @@ async def wake_word_ws(websocket: WebSocket):
     # Track last event to avoid duplicate fires
     _last_event: str = ""
     _chunks_received = 0
+    _whisper_running = False   # guard: skip new runs while previous is in flight
+
+    _CLERK = {"clerk", "clear", "click", "class", "cleric", "clerc",
+              "clerke", "clerico", "clock", "clack", "clark", "klerk"}
+
+    async def _run_whisper(pcm_bytes: bytes) -> None:
+        nonlocal _whisper_running, _last_event, audio_buf, buf_samples, stride_accum
+        try:
+            loop = asyncio.get_event_loop()
+            text = await loop.run_in_executor(None, lambda b=pcm_bytes: _ww_transcribe(b))
+            text = text.lower().strip()
+            if text:
+                _ww_log.info("wake_word[whisper]: transcript %r", text)
+            _has_clerk = any(w in text.split() or w in text for w in _CLERK)
+            _has_start = any(w in text for w in ("start", "chart", "stark"))
+            _has_over  = any(w in text for w in ("over", "voter", "ober", "uber"))
+            if _has_start and _has_clerk and _last_event != "activate":
+                _ww_log.info("wake_word[whisper]: activate")
+                _last_event = "activate"
+                audio_buf.clear()
+                buf_samples = 0
+                stride_accum = 0
+                await websocket.send_json({"event": "activate", "score": 1.0, "method": "whisper"})
+            elif _has_over and _has_clerk and _last_event != "deactivate":
+                _ww_log.info("wake_word[whisper]: deactivate")
+                _last_event = "deactivate"
+                audio_buf.clear()
+                buf_samples = 0
+                stride_accum = 0
+                await websocket.send_json({"event": "deactivate", "score": 1.0, "method": "whisper"})
+        except Exception as _stt_err:
+            _ww_log.warning("wake_word[whisper]: error — %s", _stt_err)
+        finally:
+            _whisper_running = False
 
     try:
         while True:
@@ -3749,8 +3783,6 @@ async def wake_word_ws(websocket: WebSocket):
                 preds = oww_model.predict(float_chunk)
                 start_score = float(preds.get("start_clerk", 0))
                 over_score  = float(preds.get("over_clerk",  0))
-                # Only fire if not already in that state (dedup: wait for score
-                # to drop below threshold before allowing another fire)
                 if start_score >= _OWW_THRESHOLD and _last_event != "activate":
                     _ww_log.info("wake_word[oww]: activate (score=%.3f)", start_score)
                     _last_event = "activate"
@@ -3761,7 +3793,8 @@ async def wake_word_ws(websocket: WebSocket):
                     _last_event = "deactivate"
                     await websocket.send_json({"event": "deactivate", "score": round(over_score, 3), "method": "oww"})
                     continue
-            # ── Path 2: Whisper keyword fallback (runs every ~0.5 s) ─────────
+
+            # ── Path 2: Whisper keyword fallback (fire-and-forget, 1 at a time) ─
             audio_buf.append(pcm)
             buf_samples  += len(pcm)
             stride_accum += len(pcm)
@@ -3771,39 +3804,20 @@ async def wake_word_ws(websocket: WebSocket):
 
             stride_accum = 0
 
+            if _whisper_running:
+                continue   # previous inference still in flight — skip this window
+
             # Keep last 2 seconds
             while buf_samples > _WHISPER_BUF_SAMPLES and len(audio_buf) > 1:
                 buf_samples -= len(audio_buf[0])
                 audio_buf.pop(0)
 
+            if not audio_buf:
+                continue
+
+            _whisper_running = True
             pcm_bytes = np.concatenate(audio_buf).astype(np.int16).tobytes()
-            try:
-                text = await asyncio.get_event_loop().run_in_executor(
-                    None, lambda b=pcm_bytes: _ww_transcribe(b)
-                )
-                text = text.lower().strip()
-                if text:
-                    _ww_log.info("wake_word[whisper]: transcript %r", text)
-                # Fuzzy match: tiny.en mishears "clerk" as clear/click/class/cleric etc.
-                _CLERK = {"clerk", "clear", "click", "class", "cleric", "clerc",
-                          "clerke", "clerico", "clock", "clack", "clark", "klerk"}
-                _has_clerk = any(w in text.split() or w in text for w in _CLERK)
-                _has_start = any(w in text for w in ("start", "chart", "stark"))
-                _has_over  = any(w in text for w in ("over", "voter", "ober", "uber"))
-                if _has_start and _has_clerk and _last_event != "activate":
-                    _ww_log.info("wake_word[whisper]: activate")
-                    _last_event = "activate"
-                    await websocket.send_json({"event": "activate", "score": 1.0, "method": "whisper"})
-                    audio_buf.clear()
-                    buf_samples = 0
-                elif _has_over and _has_clerk and _last_event != "deactivate":
-                    _ww_log.info("wake_word[whisper]: deactivate")
-                    _last_event = "deactivate"
-                    await websocket.send_json({"event": "deactivate", "score": 1.0, "method": "whisper"})
-                    audio_buf.clear()
-                    buf_samples = 0
-            except Exception as _stt_err:
-                _ww_log.warning("wake_word[whisper]: error — %s", _stt_err)
+            asyncio.create_task(_run_whisper(pcm_bytes))
 
     except WebSocketDisconnect:
         _ww_log.info("wake_word: client disconnected")
