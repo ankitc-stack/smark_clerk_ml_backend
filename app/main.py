@@ -119,8 +119,7 @@ async def startup_bootstrap():
         )
     else:
         app.state.docengine = None
-    # Pre-warm the wake-word Whisper model in a background thread so the first
-    # WebSocket connection doesn't incur a 6-second model-load delay.
+    # Pre-warm the wake-word Whisper model (CPU only — no Metal conflict).
     import asyncio as _asyncio
     _asyncio.get_event_loop().run_in_executor(None, _get_ww_whisper)
 
@@ -349,8 +348,25 @@ def register_template(name: str, doc_type: str, file: UploadFile = File(...), db
 
 @app.get("/templates", response_model=list[TemplateOut])
 def list_templates(doc_type: str | None = None, db: Session = Depends(get_db)):
+    # Built-in DOCX templates
     items = crud.list_templates(db, doc_type)
-    return [TemplateOut(id=i.id, name=i.name, doc_type=i.doc_type, version=i.version, zones_json=i.zones_json) for i in items]
+    result = [
+        TemplateOut(id=str(i.id), name=i.name, doc_type=i.doc_type,
+                    version=i.version, zones_json=i.zones_json, is_user_saved=False)
+        for i in items
+    ]
+    # User-saved blueprint templates from DB
+    from app.services.template_store import list_templates as _list_saved
+    for t in _list_saved(letter_type=doc_type):
+        result.append(TemplateOut(
+            id=t["template_id"],
+            name=t["display_name"],
+            doc_type=t["letter_type"],
+            version="user-saved",
+            zones_json={},
+            is_user_saved=True,
+        ))
+    return result
 
 
 @app.get("/templates/{template_id}", response_model=TemplateOut)
@@ -3747,6 +3763,148 @@ def _get_oww():
         logging.error("wake_word: failed to load models: %s", exc)
         _oww_model = None
     return _oww_model
+
+
+@app.websocket("/ws/stt-stream")
+async def stt_stream_ws(websocket: WebSocket):
+    """Streaming STT WebSocket.
+
+    Browser sends: raw PCM-16 bytes (16 kHz mono)
+                   OR JSON text {"action": "stop"} to finalise
+    Server sends:  {"type": "interim", "text": "..."}  — every ~1 s while speaking
+                   {"type": "final",   "text": "..."}  — on stop signal (full buffer)
+                   {"type": "error",   "message": "..."} — on failure
+    """
+    import numpy as np
+    import asyncio
+    import io, wave, tempfile, os, json as _json
+
+    _log = logging.getLogger("uvicorn.error")
+    await websocket.accept()
+
+    _STRIDE_SAMPLES = 16000       # run Whisper every 1 s
+    _MAX_SAMPLES    = 16000 * 60  # cap buffer at 60 s
+
+    audio_buf: list[np.ndarray] = []
+    buf_samples  = 0
+    stride_accum = 0
+    _wsp_running  = False
+    _last_interim = ""
+
+    def _transcribe_pcm(pcm_bytes: bytes) -> str:
+        """Transcribe raw PCM-16 (16 kHz mono) bytes using the configured STT model."""
+        provider = settings.STT_PROVIDER.lower()
+        try:
+            if provider == "mlx_whisper":
+                # Pass float32 numpy array directly — avoids ffmpeg dependency entirely.
+                import numpy as _np
+                audio_f32 = _np.frombuffer(pcm_bytes, dtype=_np.int16).astype(_np.float32) / 32768.0
+                from app.services.stt import _load_mlx_whisper, MLX_LOCK
+                mlx  = _load_mlx_whisper()
+                repo = f"mlx-community/whisper-{settings.STT_MODEL_NAME}"
+                with MLX_LOCK:
+                    res  = mlx.transcribe(audio_f32, path_or_hf_repo=repo)
+                return (res.get("text") or "").strip()
+            else:
+                # faster_whisper needs a WAV file on disk
+                buf = io.BytesIO()
+                with wave.open(buf, "wb") as wf:
+                    wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(16000)
+                    wf.writeframes(pcm_bytes)
+                tmp = ""
+                try:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
+                        tf.write(buf.getvalue()); tmp = tf.name
+                    from app.services.stt import _load_faster_whisper_model
+                    model = _load_faster_whisper_model()
+                    segs, _ = model.transcribe(tmp, beam_size=5, vad_filter=True)
+                    return " ".join((getattr(s, "text", "") or "").strip() for s in segs).strip()
+                finally:
+                    if tmp:
+                        try: os.remove(tmp)
+                        except OSError: pass
+        except Exception as exc:
+            _log.warning("stt_stream: transcribe error: %s", exc)
+            return ""
+
+    async def _run_interim(pcm_bytes: bytes) -> None:
+        nonlocal _wsp_running, _last_interim
+        try:
+            loop = asyncio.get_event_loop()
+            text = await loop.run_in_executor(None, lambda b=pcm_bytes: _transcribe_pcm(b))
+            text = text.strip()
+            if text and text != _last_interim:
+                _last_interim = text
+                await websocket.send_json({"type": "interim", "text": text})
+        except Exception as exc:
+            _log.warning("stt_stream: interim send error: %s", exc)
+        finally:
+            _wsp_running = False
+
+    try:
+        while True:
+            msg = await websocket.receive()
+
+            # ── Text frame: stop signal ─────────────────────────────────────
+            raw_text = msg.get("text")
+            if raw_text:
+                try:
+                    data = _json.loads(raw_text)
+                except Exception:
+                    data = {}
+                if data.get("action") == "stop":
+                    if _last_interim:
+                        # Reuse the last good interim — avoids re-transcribing background
+                        # noise that leaked into the buffer after the command ended.
+                        await websocket.send_json({"type": "final", "text": _last_interim})
+                    elif audio_buf:
+                        # No interim yet (speech was shorter than the stride window) —
+                        # do a one-shot transcription of what we have.
+                        all_pcm = np.concatenate(audio_buf).astype(np.int16).tobytes()
+                        loop    = asyncio.get_event_loop()
+                        final   = await loop.run_in_executor(
+                            None, lambda b=all_pcm: _transcribe_pcm(b)
+                        )
+                        await websocket.send_json({"type": "final", "text": final.strip()})
+                    else:
+                        await websocket.send_json({"type": "final", "text": ""})
+                    break
+                continue
+
+            # ── Binary frame: PCM-16 audio chunk ───────────────────────────
+            chunk = msg.get("bytes")
+            if not chunk or len(chunk) < 2:
+                continue
+
+            pcm = np.frombuffer(chunk, dtype=np.int16)
+            audio_buf.append(pcm)
+            buf_samples  += len(pcm)
+            stride_accum += len(pcm)
+
+            # Trim if > 60 s
+            while buf_samples > _MAX_SAMPLES and len(audio_buf) > 1:
+                buf_samples -= len(audio_buf[0])
+                audio_buf.pop(0)
+
+            if stride_accum < _STRIDE_SAMPLES:
+                continue
+            stride_accum = 0
+
+            if _wsp_running:
+                continue  # previous inference in flight — skip
+
+            _wsp_running = True
+            pcm_snap = np.concatenate(audio_buf).astype(np.int16).tobytes()
+            asyncio.create_task(_run_interim(pcm_snap))
+
+    except WebSocketDisconnect:
+        pass
+    except Exception as exc:
+        _log.warning("stt_stream: error — %s", exc)
+        try:
+            await websocket.send_json({"type": "error", "message": str(exc)})
+        except Exception:
+            pass
 
 
 @app.websocket("/ws/wake-word")

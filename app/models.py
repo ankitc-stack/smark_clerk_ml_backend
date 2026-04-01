@@ -80,6 +80,16 @@ class RequestLog(Base):
     created_at  = mapped_column(DateTime,    default=datetime.utcnow, index=True)
 
 
+class UserSavedTemplate(Base):
+    __tablename__ = "user_saved_templates"
+    template_id    = mapped_column(String(64),  primary_key=True)
+    letter_type    = mapped_column(String(64),  nullable=False, index=True)
+    display_name   = mapped_column(String(200), nullable=False)
+    source_doc_id  = mapped_column(String(40),  nullable=True)
+    section_schema = mapped_column(JSON,        nullable=False, default=list)
+    created_at     = mapped_column(DateTime,    default=datetime.utcnow, index=True)
+
+
 class SttLog(Base):
     __tablename__ = "stt_logs"
     id         = mapped_column(String(40), primary_key=True, default=lambda: uuid.uuid4().hex)

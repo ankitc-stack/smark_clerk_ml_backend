@@ -57,7 +57,7 @@ class Settings(BaseSettings):
 
     # Voice/STT
     ENABLE_VOICE_INPUT: bool = False
-    STT_PROVIDER: str = "faster_whisper"  # faster_whisper|stub
+    STT_PROVIDER: str = "mlx_whisper"  # faster_whisper|stub
     STT_MODEL_NAME: str = "large-v3-turbo"
     STT_DEVICE: str = "cpu"  # cpu|cuda|auto
     STT_COMPUTE_TYPE: str = "int8"

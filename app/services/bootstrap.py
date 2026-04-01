@@ -16,15 +16,24 @@ def bootstrap(db: Session):
     # Those templates (GOI Letter, DO Letter, etc.) are seeded by migrations and must not
     # be crowded out by stale docx filenames on every container restart.
     _CURATED_NAMES = {"GOI Letter", "DO Letter", "Movement Order", "Leave Certificate", "Service Letter", "General Letter"}
-    # Seed General Letter if missing (blueprint-backed, no docx needed)
-    if not db.query(Template).filter(Template.name == "General Letter").first():
-        import datetime as _dt
-        db.add(Template(
-            name="General Letter", doc_type="GENERAL_LETTER",
-            version="v1", docx_path="", zones_json={},
-            created_at=_dt.datetime.utcnow(),
-        ))
-        db.commit()
+    # Seed all curated blueprint-backed templates if missing (no docx required)
+    import datetime as _dt
+    _CURATED_SEEDS = [
+        ("General Letter",     "GENERAL_LETTER"),
+        ("GOI Letter",         "GOI_LETTER"),
+        ("DO Letter",          "DO_LETTER"),
+        ("Movement Order",     "MOVEMENT_ORDER"),
+        ("Leave Certificate",  "LEAVE_CERTIFICATE"),
+        ("Service Letter",     "SERVICE_LETTER"),
+    ]
+    for _name, _dtype in _CURATED_SEEDS:
+        if not db.query(Template).filter(Template.name == _name).first():
+            db.add(Template(
+                name=_name, doc_type=_dtype,
+                version="v1", docx_path="", zones_json={},
+                created_at=_dt.datetime.utcnow(),
+            ))
+    db.commit()
     if db.query(Template).filter(Template.name.in_(_CURATED_NAMES)).count() >= len(_CURATED_NAMES):
         pass  # curated set present — skip docx scan
     else:

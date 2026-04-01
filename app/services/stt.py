@@ -4,12 +4,18 @@ import io
 import math
 import os
 import tempfile
+import threading
 import time
 import wave
 import audioop
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from functools import lru_cache
 from typing import Any
+
+# Global lock — MLX/Metal cannot encode two command buffers at the same time.
+# Every mlx.transcribe() call (both the streaming STT and the command/REST path)
+# must acquire this lock before touching Metal.
+MLX_LOCK = threading.Lock()
 
 from app.config import settings
 
@@ -208,7 +214,8 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> tuple[str, dict[str, Any]]
             mlx_kwargs: dict[str, Any] = {}
             if settings.STT_FORCE_LANGUAGE:
                 mlx_kwargs["language"] = settings.STT_FORCE_LANGUAGE
-            result = mlx.transcribe(tmp_path, path_or_hf_repo=repo, **mlx_kwargs)
+            with MLX_LOCK:
+                result = mlx.transcribe(tmp_path, path_or_hf_repo=repo, **mlx_kwargs)
             transcript = (result.get("text") or "").strip()
             if not transcript:
                 raise STTTranscriptionError("No speech content detected in audio")

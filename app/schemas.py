@@ -20,11 +20,12 @@ class TemplateRegisterResponse(BaseModel):
     doc_type: str
 
 class TemplateOut(BaseModel):
-    id: int
+    id: str                          # str to accommodate both int DOCX ids and user-saved string ids
     name: str
     doc_type: str
     version: str
     zones_json: Dict[str, Any]
+    is_user_saved: bool = False      # True for user-saved templates
 
 class UploadResponse(BaseModel):
     document_id: str

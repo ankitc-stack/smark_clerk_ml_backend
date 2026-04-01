@@ -1,28 +1,23 @@
-"""Letter Template Store — Phase 7.
+"""Letter Template Store — Phase 7 (DB-backed).
 
 Saves the *structure* (section order + static fields) of a letter as a reusable
-template.  Variable content (subject, paragraphs, ref, date, receiver) is blanked
-out; static fields (letterhead, signee_block) are preserved.
+template in PostgreSQL.  Variable content (subject, paragraphs, ref, date,
+receiver) is blanked out; static fields (letterhead, signee_block) are preserved.
 """
 from __future__ import annotations
 
-import json
-import os
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
-
-_STORE_DIR = os.path.join("data", "saved_templates")
 
 # Section types whose content should be preserved when saving as template.
 # Everything else is blanked so the user fills it fresh each time.
 _STICKY_TYPES: frozenset[str] = frozenset({"letterhead", "signee_block"})
 
 
-def _store_dir() -> str:
-    os.makedirs(_STORE_DIR, exist_ok=True)
-    return _STORE_DIR
+def _get_db():
+    from app.db import SessionLocal
+    return SessionLocal()
 
 
 def save_template(
@@ -31,63 +26,81 @@ def save_template(
     doc_id: str,
     section_schema: list[dict],
 ) -> str:
-    """Persist a template JSON to disk.  Returns the new template_id."""
+    """Persist a template to the DB. Returns the new template_id."""
+    from app.models import UserSavedTemplate
     template_id = f"{letter_type}_{uuid.uuid4().hex[:8]}"
-    data = {
-        "template_id": template_id,
-        "letter_type": letter_type,
-        "display_name": display_name or letter_type.replace("_", " ").title(),
-        "saved_at": datetime.now(timezone.utc).isoformat(),
-        "source_doc_id": doc_id,
-        "section_schema": section_schema,
-    }
-    path = os.path.join(_store_dir(), f"{template_id}.json")
-    Path(path).write_text(json.dumps(data, ensure_ascii=False, indent=2))
+    db = _get_db()
+    try:
+        db.add(UserSavedTemplate(
+            template_id=template_id,
+            letter_type=letter_type,
+            display_name=display_name or letter_type.replace("_", " ").title(),
+            source_doc_id=doc_id,
+            section_schema=section_schema,
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        ))
+        db.commit()
+    finally:
+        db.close()
     return template_id
 
 
 def list_templates(letter_type: Optional[str] = None) -> list[dict]:
-    """Return saved templates, optionally filtered by letter_type, newest first."""
-    d = _store_dir()
-    results: list[dict] = []
-    for fname in os.listdir(d):
-        if not fname.endswith(".json"):
-            continue
-        try:
-            data = json.loads(Path(os.path.join(d, fname)).read_text())
-        except Exception:
-            continue
-        if letter_type and data.get("letter_type") != letter_type:
-            continue
-        results.append({
-            "template_id":  data.get("template_id", fname[:-5]),
-            "letter_type":  data.get("letter_type", ""),
-            "display_name": data.get("display_name", ""),
-            "saved_at":     data.get("saved_at", ""),
-            "section_count": len(data.get("section_schema") or []),
-        })
-    results.sort(key=lambda x: x["saved_at"], reverse=True)
-    return results
+    """Return saved templates from DB, optionally filtered by letter_type, newest first."""
+    from app.models import UserSavedTemplate
+    db = _get_db()
+    try:
+        q = db.query(UserSavedTemplate)
+        if letter_type:
+            q = q.filter(UserSavedTemplate.letter_type == letter_type)
+        rows = q.order_by(UserSavedTemplate.created_at.desc()).all()
+        return [
+            {
+                "template_id":   r.template_id,
+                "letter_type":   r.letter_type,
+                "display_name":  r.display_name,
+                "saved_at":      r.created_at.isoformat() if r.created_at else "",
+                "section_count": len(r.section_schema or []),
+            }
+            for r in rows
+        ]
+    finally:
+        db.close()
 
 
 def load_template(template_id: str) -> Optional[dict]:
-    """Load a template by ID.  Returns None if not found."""
-    path = os.path.join(_store_dir(), f"{template_id}.json")
-    if not os.path.exists(path):
-        return None
+    """Load a template by ID from DB. Returns None if not found."""
+    from app.models import UserSavedTemplate
+    db = _get_db()
     try:
-        return json.loads(Path(path).read_text())
-    except Exception:
-        return None
+        row = db.get(UserSavedTemplate, template_id)
+        if not row:
+            return None
+        return {
+            "template_id":    row.template_id,
+            "letter_type":    row.letter_type,
+            "display_name":   row.display_name,
+            "saved_at":       row.created_at.isoformat() if row.created_at else "",
+            "source_doc_id":  row.source_doc_id,
+            "section_schema": row.section_schema or [],
+        }
+    finally:
+        db.close()
 
 
 def delete_template(template_id: str) -> bool:
-    """Delete a template.  Returns True if deleted, False if not found."""
-    path = os.path.join(_store_dir(), f"{template_id}.json")
-    if not os.path.exists(path):
-        return False
-    os.remove(path)
-    return True
+    """Delete a template from DB. Returns True if deleted, False if not found."""
+    from app.models import UserSavedTemplate
+    db = _get_db()
+    try:
+        row = db.get(UserSavedTemplate, template_id)
+        if not row:
+            return False
+        db.delete(row)
+        db.commit()
+        return True
+    finally:
+        db.close()
 
 
 def build_section_schema(sections: list[dict], section_text_fn) -> list[dict]:
