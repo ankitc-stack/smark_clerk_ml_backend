@@ -32,6 +32,66 @@ Officer → POST /documents/generate (or /upload)
 
 ---
 
+## Hardware Requirements
+
+### Current dev environment — Apple M4 (local, native)
+
+| Component | Memory used | Device |
+|---|---|---|
+| Ollama `llama3.1:8b` | ~5.5 GB unified | Metal (GPU) via Ollama host |
+| Surya OCR | ~2 GB RAM | CPU (inside Docker) |
+| faster-whisper `large-v3-turbo` | ~1.5 GB RAM | CPU (inside Docker) |
+| mlx-whisper `large-v3-turbo` | ~1.5 GB unified | **Metal (GPU)** — set `STT_PROVIDER=mlx_whisper`, run natively |
+| fastembed embeddings | ~80 MB RAM | CPU |
+| PostgreSQL + Docker overhead | ~1 GB RAM | CPU |
+| **Total** | **~12 GB** | |
+
+**Minimum:** 16 GB unified memory (8 GB works but tight — swap will be hit during OCR + LLM overlap)
+**Recommended:** 24 GB unified memory — headroom for `qwen2.5:14b` and concurrent uploads
+
+**Note:** Docker containers (Surya, faster-whisper) run CPU-only — Metal is only accessible to the host process. For Metal-accelerated STT, run the ML pipeline natively outside Docker and set `STT_PROVIDER=mlx_whisper`.
+
+**Disk:** ~15 GB for models (`llama3.1:8b` 4.7 GB + Surya ~1.5 GB + Whisper ~1.5 GB + fastembed ~80 MB + OS/deps)
+
+---
+
+### Production server — CUDA GPU (Linux)
+
+| Component | VRAM used | Notes |
+|---|---|---|
+| Ollama `llama3.1:8b` | ~5.5 GB | On GPU via `OLLAMA_NUM_GPU=99` |
+| Surya OCR | ~2.5 GB | Auto-detects CUDA via PyTorch |
+| faster-whisper `large-v3-turbo` | ~3 GB | `STT_DEVICE=cuda`, `STT_COMPUTE_TYPE=float16` |
+| **Total** | **~11 GB VRAM** | |
+
+| GPU | VRAM | Verdict |
+|---|---|---|
+| RTX 3060 | 12 GB | **Minimum** — all models fit; no headroom for larger LLM |
+| RTX 3090 | 24 GB | **Recommended** — fits `qwen2.5:14b` (~9 GB) for better quality |
+| RTX 4090 | 24 GB | **Optimal** — 2-3× faster inference vs 3090 per watt |
+
+**CPU:** 8+ cores (AMD Ryzen 5 3600 / Intel i5-12th gen or better)
+**RAM:** 16 GB minimum, 32 GB recommended (models load into RAM before GPU transfer)
+**Disk:** 50 GB SSD
+**OS:** Ubuntu 22.04 + NVIDIA driver ≥525 + CUDA 12.1
+
+To enable GPU in Docker Compose, add to `ml-pipeline` service:
+```yaml
+deploy:
+  resources:
+    reservations:
+      devices:
+        - driver: nvidia
+          count: 1
+          capabilities: [gpu]
+environment:
+  STT_DEVICE: "cuda"
+  STT_COMPUTE_TYPE: "float16"
+```
+Also switch Dockerfile base image to `nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04` and pin `torch` with `+cu121` wheel.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -103,7 +163,7 @@ Upload an existing letter (DOCX / PDF / scanned PDF / photo) — sections are ex
 Supported formats: `.docx`, `.pdf`, `.jpg`, `.jpeg`, `.png`, `.tiff`, `.bmp`
 - Digital DOCX → python-docx paragraph extraction
 - Digital PDF → PyMuPDF text extraction
-- Scanned PDF / image → PaddleOCR (PP-OCRv4, CPU)
+- Scanned PDF / image → Surya OCR (layout-aware, open source)
 
 ### AI Command Editing (`POST /documents/{id}/command`)
 Edit any section with natural language — text or voice.
@@ -152,7 +212,7 @@ Generates a correctly formatted DOCX using python-docx:
 | `AUTO_BOOTSTRAP` | `true` | Auto-load rulebook + seed data on startup |
 | `DATA_DIR` | `./data` | Prompt library and seed data location |
 | `RULEBOOK_FILENAME` | `rulebook.pdf` | JSSD rulebook filename in DATA_DIR |
-| `STT_PROVIDER` | `faster_whisper` | STT backend: `faster_whisper` or `stub` |
+| `STT_PROVIDER` | `faster_whisper` | STT backend: `faster_whisper`, `mlx_whisper` (Apple M-series Metal), or `stub` |
 | `STT_MODEL_NAME` | `large-v3-turbo` | Whisper model name |
 | `STT_DEVICE` | `cpu` | `cpu`, `cuda`, or `auto` |
 | `STT_COMPUTE_TYPE` | `int8` | `int8` (CPU) or `float16` (GPU) |
@@ -179,15 +239,19 @@ curl http://localhost:11434/api/tags
 
 ### Whisper (STT)
 ```bash
-# CPU warmup (downloads ~1.5 GB model on first use)
+# CPU warmup — faster-whisper (works in Docker, Linux, CUDA GPU servers)
 python -c "from faster_whisper import WhisperModel; WhisperModel('large-v3-turbo', device='cpu', compute_type='int8')"
 
-# GPU warmup
+# CUDA GPU warmup
 python -c "from faster_whisper import WhisperModel; WhisperModel('large-v3-turbo', device='cuda', compute_type='float16')"
+
+# Apple M-series (Metal) — mlx-whisper (3-5x faster than CPU on M4)
+# Set STT_PROVIDER=mlx_whisper in .env, then first call auto-downloads model from HuggingFace:
+# mlx-community/whisper-large-v3-turbo
 ```
 
-### PaddleOCR (scanned document OCR)
-Models download automatically (~60 MB) on first `/documents/upload` with an image or scanned PDF.
+### Surya OCR (scanned document OCR)
+Models download automatically (~1.5 GB) on first `/documents/upload` with an image or scanned PDF.
 
 ---
 
@@ -255,7 +319,7 @@ One JSON log line per request: `event=command_request`
 |---|---|---|
 | `503 Doc-Engine not available` | `DOCENGINE_ENABLED=false` or doc-engine not running | Set `DOCENGINE_ENABLED=true`, start doc-engine on :8001 |
 | GOI/DO letter has generic boilerplate text | Ollama not running or model not pulled | `ollama pull llama3.1:8b`, check `OLLAMA_BASE_URL` |
-| Upload returns 400 on .pdf | PaddleOCR import error | Check `libgl1` installed in container; re-run `docker compose build` |
+| Upload returns 400 on .pdf | Surya OCR import error | Ensure `surya-ocr` is installed; re-run `docker compose build` |
 | `409 version_conflict` | Stale version sent | Fetch latest version from `GET /documents/{id}`, retry |
 | `patch_apply_failed` | Doc-engine rejected patch | Check doc-engine logs; retry with simpler command |
 | STT `needs_clarification` | Low confidence audio | Re-record; check `STT_CONFIRM_CONFIDENCE` threshold |

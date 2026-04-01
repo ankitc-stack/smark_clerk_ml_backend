@@ -15,7 +15,16 @@ def bootstrap(db: Session):
     # Skip docx auto-seeding entirely when the curated blueprint templates already exist.
     # Those templates (GOI Letter, DO Letter, etc.) are seeded by migrations and must not
     # be crowded out by stale docx filenames on every container restart.
-    _CURATED_NAMES = {"GOI Letter", "DO Letter", "Movement Order", "Leave Certificate", "Service Letter"}
+    _CURATED_NAMES = {"GOI Letter", "DO Letter", "Movement Order", "Leave Certificate", "Service Letter", "General Letter"}
+    # Seed General Letter if missing (blueprint-backed, no docx needed)
+    if not db.query(Template).filter(Template.name == "General Letter").first():
+        import datetime as _dt
+        db.add(Template(
+            name="General Letter", doc_type="GENERAL_LETTER",
+            version="v1", docx_path="", zones_json={},
+            created_at=_dt.datetime.utcnow(),
+        ))
+        db.commit()
     if db.query(Template).filter(Template.name.in_(_CURATED_NAMES)).count() >= len(_CURATED_NAMES):
         pass  # curated set present — skip docx scan
     else:

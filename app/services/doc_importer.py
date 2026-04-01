@@ -652,7 +652,14 @@ def generate_plain_docx(sections: list[dict], title: str, out_path: str) -> None
 
         elif sec_type == "salutation":
             doc.add_paragraph("")  # blank line before salutation
-            doc.add_paragraph(text.strip())
+            p = doc.add_paragraph()
+            if sec.get("align") == "center":
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = p.add_run(text.strip())
+            if sec.get("bold"):
+                run.bold = True
+            if sec.get("underline"):
+                run.underline = True
 
         elif sec_type == "precedence":
             # JSSD Appendix E: precedence keyword is right-aligned in superscription
@@ -982,6 +989,7 @@ _RE_ENCL         = re.compile(r"^\s*Encl(?:osure)?\b", re.IGNORECASE)
 _RE_ANNEXURE     = re.compile(r"^\s*ANNEXURE\b", re.IGNORECASE)
 _RE_LONE_NUMBER    = re.compile(r"^\s*\d+[\.\)]\s*$")
 _RE_TO_LINE        = re.compile(r"^\s*To\s*[,:]?\s*$", re.IGNORECASE)
+_RE_TO_WHOMSOEVER  = re.compile(r"^\s*To\s+whom(?:so)?ever\s+it\s+may\s+concern", re.IGNORECASE)
 _RE_SALUTATION     = re.compile(r"^\s*(?:Dear\s+(?:Sir|Ma'?am)|Sir|Ma'?am|Respected\s+Sir)\s*[,.]?\s*$", re.IGNORECASE)
 _RE_SECURITY_CLASS = re.compile(r"^\s*SECURITY\s+CLASSIFICATION\b", re.IGNORECASE)
 _RE_PRECEDENCE     = re.compile(r"^\s*(?:IMMEDIATE|PRIORITY|ROUTINE|FLASH|OPERATIONAL\s+IMMEDIATE)\s*$", re.IGNORECASE)
@@ -1226,14 +1234,18 @@ def _detect_sections_layout(row_infos: list[dict]) -> list[dict]:
     _current_row_y: float = 0.0          # y_mid of the row being processed
     _row_bold: bool = False              # inferred from OCR bbox height for current row
 
-    def _add(sec_type: str, text: str, confidence: float) -> None:
+    def _add(sec_type: str, text: str, confidence: float, *, align: str = "", force_bold: bool = False, force_underline: bool = False) -> None:
         nonlocal current_para_idx
         entry: dict = {"type": sec_type, "text": text, "confidence": confidence,
                        "_y_mid": _current_row_y}
         if confidence < 0.6:
             entry["low_confidence"] = True
-        if _row_bold:
+        if _row_bold or force_bold:
             entry["bold"] = True
+        if force_underline:
+            entry["underline"] = True
+        if align:
+            entry["align"] = align
         sections.append(entry)
         current_para_idx = len(sections) - 1 if sec_type == "paragraph" else None
 
@@ -1280,6 +1292,12 @@ def _detect_sections_layout(row_infos: list[dict]) -> list[dict]:
         # ── Security classification line (top/bottom of letter) ─────────────
         if _RE_SECURITY_CLASS.match(text):
             _add("security_classification", text, 0.95)
+            continue
+
+        # ── "To whomsoever it may Concern" — certificate / NOC opener ────────
+        # Maps to salutation (blueprint order 5, after subject=4) so title comes first
+        if _RE_TO_WHOMSOEVER.match(text):
+            _add("salutation", text, 0.95, align="center", force_bold=True, force_underline=True)
             continue
 
         # ── Inline row: separate left cluster (ref) and right cluster (date) ────
@@ -1509,6 +1527,13 @@ def _detect_sections(paragraphs: list[str]) -> list[dict]:
         elif _RE_SECURITY_CLASS.match(para):
             sec_type, confidence = "security_classification", 0.95
             last_para_idx = None
+
+        # --- "To whomsoever it may Concern" — certificate/NOC opener ---
+        elif _RE_TO_WHOMSOEVER.match(para):
+            sections.append({"type": "salutation", "text": para, "confidence": 0.95,
+                              "bold": True, "underline": True, "align": "center"})
+            last_para_idx = None
+            continue
 
         # --- reference_number ---
         elif i < 12 and (_RE_REF_1.match(para) or _RE_REF_2.match(para) or _RE_REF_3.match(para)):

@@ -322,19 +322,15 @@ page.get_text("text")
 ```
 Fast text extraction. Preserves paragraph breaks. No OCR needed.
 
-**Scanned PDF / Image (`PaddleOCR`)**:
+**Scanned PDF / Image (`Surya OCR`)**:
 - For PDFs: renders each page to an image (2× zoom, ~144 dpi) using PyMuPDF, then runs OCR
-- For images: directly passed to PaddleOCR
-- PaddleOCR is loaded as a lazy singleton (`_get_ocr()`) — first call downloads models (~60 MB), subsequent calls reuse the loaded model in memory
+- For images: directly passed to Surya OCR
+- Surya models are loaded as a lazy singleton (`_get_surya_models()`) — first call downloads models (~1.5 GB), subsequent calls reuse loaded models in memory
+- Returns line-level bounding boxes used for layout-aware section detection and inferred bold heuristics (tall bbox → bold text)
 
-### Why PaddleOCR over Tesseract?
+### Why Surya OCR over PaddleOCR?
 
-PaddleOCR (PP-OCRv4) has significantly better accuracy for dense text layouts — important for military letters with tight spacing, stamps, and handwritten annotations. It also handles skewed/rotated pages via its angle classifier. Tesseract needs careful preprocessing (deskew, binarize) for comparable accuracy.
-
-**ARM64 note**: `paddlepaddle` must be installed from PaddlePaddle's own wheel channel before `requirements.txt` on ARM (Apple Silicon / ARM servers):
-```bash
-pip install paddlepaddle==2.6.2 -f https://www.paddlepaddle.org.cn/whl/linux/cpu-aarch64/stable.html
-```
+Surya OCR has better layout understanding and is open source (MIT licence, USA origin — no supply-chain concerns). PaddleOCR is Baidu-developed (Chinese origin), which is a security/supply-chain concern for defence deployments. Surya also provides bounding box coordinates enabling bbox-height bold inference, which PaddleOCR did not expose cleanly.
 
 ### Section detection
 
@@ -543,17 +539,17 @@ This is preparation for future fine-tuning. The JSONL format is directly compati
 | **httpx** | 0.27 | HTTP client for doc-engine calls | Async-native, same interface as requests |
 | **python-docx** | 1.1 | DOCX generation | Only mature Python DOCX builder; supports runs/styles/footers |
 | **PyMuPDF (fitz)** | 1.24 | PDF text extraction + page rendering | Faster and more accurate than pdfminer; renders pages to images for OCR |
-| **PaddleOCR** | <3.0 | OCR for scanned PDFs and images | Better accuracy than Tesseract for dense layouts; angle-aware |
-| **paddlepaddle** | 2.6.2 | PaddleOCR backend | Required by PaddleOCR; CPU-only build used |
-| **Pillow** | 10.4 | Image loading/preprocessing | Required by PaddleOCR; also used for PDF page rendering |
-| **faster-whisper** | 1.1 | Speech-to-text (STT) | 4× faster than original Whisper; int8 CPU mode; Hindi support |
+| **surya-ocr** | latest | OCR for scanned PDFs and images | Layout-aware; bbox coordinates for bold inference; MIT licence (USA origin) |
+| **Pillow** | 10.4 | Image loading/preprocessing | Used for PDF page rendering and image preprocessing |
+| **faster-whisper** | 1.1 | Speech-to-text (STT) — CPU/CUDA | 4× faster than original Whisper; int8 CPU mode; Hindi support |
+| **mlx-whisper** | latest | Speech-to-text (STT) — Apple Metal | MLX-based; 3-5× faster than CPU on M-series; auto-skipped on Linux via platform marker |
 | **fastembed** | 0.4 | Text embeddings for rulebook RAG | Runs locally, no API calls, ~80ms per chunk |
 | **pgvector** | 0.3 | Vector similarity search in Postgres | Extensions for cosine similarity; needed for rulebook RAG |
 | **convertdate** | 2.4 | Gregorian → Saka Indian calendar | Pure Python; correct Indian National Calendar conversion |
 | **tenacity** | 9.0 | Retry logic with backoff | Used for Ollama LLM retries on timeout |
 | **docxtpl** | 0.17 | Jinja2-based DOCX template fill | Used for older template-based generation (pre-doc-engine) |
 | **psycopg[binary]** | 3.2 | Async PostgreSQL driver | psycopg3 is the current standard; psycopg2 is legacy |
-| **numpy** | 2.0 | Array operations for embeddings | Required by fastembed and PaddleOCR |
+| **numpy** | 2.0 | Array operations for embeddings | Required by fastembed and Surya OCR |
 
 ### Libraries considered but not used
 
@@ -561,7 +557,7 @@ This is preparation for future fine-tuning. The JSONL format is directly compati
 |---|---|
 | **Tesseract / pytesseract** | Lower accuracy for dense layouts; needs system-level `tesseract` install; no angle correction |
 | **LangChain** | Too much abstraction over Ollama calls; we only need single-turn chat + embeddings — direct httpx is clearer |
-| **HuggingFace transformers** | Too heavy; PaddleOCR + faster-whisper cover our specific needs without 10+ GB of CUDA deps |
+| **HuggingFace transformers** | Too heavy; Surya OCR + faster-whisper cover our specific needs without 10+ GB of CUDA deps |
 | **spaCy** | Overkill for our intent parsing; rule-based regex is faster and 100% accurate on the 278 documented cases |
 | **Redis** | No need for cross-process caching yet; single-worker deployment with in-process lru_cache suffices |
 
@@ -595,7 +591,7 @@ We use python-docx directly for export, not LibreOffice headless conversion.
 
 ### 4. Local-only, no external API calls
 
-All AI features run locally: Ollama (LLM), faster-whisper (STT), PaddleOCR (OCR), fastembed (embeddings).
+All AI features run locally: Ollama (LLM), faster-whisper/mlx-whisper (STT), Surya OCR (OCR), fastembed (embeddings).
 
 **Why**: The Army's documents are classified. Sending content to an external API (OpenAI, Anthropic, Google) is a security non-starter. Local models avoid this entirely.
 
@@ -609,13 +605,63 @@ Both the ML pipeline and doc-engine use version-based optimistic concurrency ins
 
 ---
 
-## 14. Known Limitations
+## 14. Hardware Requirements
+
+### Current dev environment — Apple M4 (local)
+
+All AI components run on the host machine. Docker containers (Surya OCR, faster-whisper) are CPU-only; Ollama runs natively with Metal GPU acceleration.
+
+| Component | Memory | Device |
+|---|---|---|
+| Ollama `llama3.1:8b` | ~5.5 GB unified | Metal GPU (host) |
+| Surya OCR | ~2 GB RAM | CPU (Docker container) |
+| faster-whisper `large-v3-turbo` | ~1.5 GB RAM | CPU (Docker container) |
+| mlx-whisper `large-v3-turbo` | ~1.5 GB unified | Metal GPU (native host only) |
+| fastembed | ~80 MB RAM | CPU |
+| PostgreSQL + Docker | ~1 GB RAM | CPU |
+| **Total** | **~12 GB** | |
+
+- **Minimum:** 16 GB unified memory
+- **Recommended:** 24 GB — headroom for `qwen2.5:14b` and concurrent upload+edit
+- **Disk:** ~15 GB (models + deps)
+- **Metal STT note:** To use `mlx_whisper`, run the ML pipeline natively (not in Docker) — `STT_PROVIDER=mlx_whisper` in `.env`. Docker has no Metal access.
+
+### Production server — CUDA GPU (Linux)
+
+| Component | VRAM | Notes |
+|---|---|---|
+| Ollama `llama3.1:8b` | ~5.5 GB | Metal/CUDA via Ollama |
+| Surya OCR | ~2.5 GB | PyTorch auto-detects CUDA |
+| faster-whisper `large-v3-turbo` | ~3 GB | `STT_DEVICE=cuda`, `STT_COMPUTE_TYPE=float16` |
+| **Total** | **~11 GB VRAM** | |
+
+| GPU | VRAM | Verdict |
+|---|---|---|
+| RTX 3060 | 12 GB | Minimum — all models fit |
+| RTX 3090 | 24 GB | Recommended — also fits `qwen2.5:14b` |
+| RTX 4090 | 24 GB | Optimal — 2-3× faster than 3090 |
+
+- **CPU:** 8+ cores; **RAM:** 32 GB recommended; **OS:** Ubuntu 22.04 + CUDA 12.1
+- **Dockerfile change for GPU:** swap base image to `nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04`, pin `torch==2.4.0+cu121`, add `nvidia-cublas-cu12 nvidia-cudnn-cu12`
+- **docker-compose.yml change:** add `deploy.resources.reservations.devices` NVIDIA runtime block to `ml-pipeline` service
+
+### Inference speed comparison
+
+| Task | M4 CPU | M4 Metal (native) | RTX 3060 | RTX 4090 |
+|---|---|---|---|---|
+| LLM generation (tok/s) | ~8 (Docker) | ~40 (Ollama host) | ~80 | ~150 |
+| Surya OCR (1 page) | ~6s | — | ~0.8s | ~0.3s |
+| STT 10s clip | ~15s (faster-whisper) | ~3s (mlx-whisper) | ~1.5s | ~0.5s |
+
+---
+
+## 15. Known Limitations
 
 ### LLM quality (llama3.1:8b)
 Small models copy example text, generate generic boilerplate, and occasionally hallucinate names/dates. The `_is_off_topic` retry helps but doesn't fully solve it. Upgrading to `qwen2.5:14b` (~9 GB) or `llama3.1:70b` (~40 GB) would significantly improve quality.
 
 ### OCR on low-quality scans
-PaddleOCR handles most scanned letters well, but very low-resolution or heavily stamped documents may extract garbled text. Confidence values in the detected sections help identify these.
+Surya OCR handles most scanned letters well, but very low-resolution or heavily stamped documents may extract garbled text. Confidence values in the detected sections help identify these.
 
 ### Section detection edge cases
 `_detect_sections` uses heuristics. Unusual layouts (no subject line, non-standard numbering, merged letterhead+address) may produce wrong section types. The `low_confidence` flag helps the frontend highlight these.

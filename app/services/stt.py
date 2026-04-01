@@ -144,6 +144,18 @@ def _get_faster_whisper_model_with_timeout():
             raise STTTranscriptionError("STT model initialization timed out") from ex
 
 
+@lru_cache(maxsize=1)
+def _load_mlx_whisper():
+    """Load mlx-whisper module (Apple Silicon / Metal only)."""
+    try:
+        import mlx_whisper as _mlx  # noqa: PLC0415
+        return _mlx
+    except ImportError as ex:
+        raise STTTranscriptionError(
+            "mlx-whisper is not installed; run: pip install mlx-whisper"
+        ) from ex
+
+
 def _confidence_from_segments(segments: list[Any]) -> float:
     avg_logprobs: list[float] = []
     no_speech_probs: list[float] = []
@@ -178,10 +190,9 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> tuple[str, dict[str, Any]]
     if normalized_mime in {"audio/wav", "audio/x-wav", "audio/wave"}:
         audio_bytes = _normalize_wav_bytes_for_stt(audio_bytes)
 
-    if settings.STT_PROVIDER.lower() != "faster_whisper":
+    provider = settings.STT_PROVIDER.lower()
+    if provider not in {"faster_whisper", "mlx_whisper"}:
         raise STTTranscriptionError("Voice transcription provider is not configured")
-
-    model = _get_faster_whisper_model_with_timeout()
 
     suffix = _ALLOWED_MIME_TO_SUFFIX[normalized_mime]
     tmp_path = ""
@@ -191,6 +202,36 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> tuple[str, dict[str, Any]]
             temp_file.flush()
             tmp_path = temp_file.name
 
+        if provider == "mlx_whisper":
+            mlx = _load_mlx_whisper()
+            repo = f"mlx-community/whisper-{settings.STT_MODEL_NAME}"
+            mlx_kwargs: dict[str, Any] = {}
+            if settings.STT_FORCE_LANGUAGE:
+                mlx_kwargs["language"] = settings.STT_FORCE_LANGUAGE
+            result = mlx.transcribe(tmp_path, path_or_hf_repo=repo, **mlx_kwargs)
+            transcript = (result.get("text") or "").strip()
+            if not transcript:
+                raise STTTranscriptionError("No speech content detected in audio")
+            # mlx-whisper returns segment dicts — adapt to object interface for _confidence_from_segments
+            class _Seg:
+                def __init__(self, d: dict) -> None:
+                    self.avg_logprob = d.get("avg_logprob")
+                    self.no_speech_prob = d.get("no_speech_prob")
+            confidence = _confidence_from_segments([_Seg(s) for s in (result.get("segments") or [])])
+            if confidence < float(settings.STT_MIN_CONFIDENCE):
+                raise STTLowConfidenceError("Audio confidence is too low; please repeat")
+            latency_ms = int((time.perf_counter() - started) * 1000)
+            return transcript, {
+                "stt_model": settings.STT_MODEL_NAME,
+                "stt_device": "metal",
+                "stt_compute_type": "mlx",
+                "stt_language_detected": result.get("language"),
+                "stt_confidence": confidence,
+                "stt_latency_ms": latency_ms,
+            }
+
+        # faster_whisper path
+        model = _get_faster_whisper_model_with_timeout()
         kwargs: dict[str, Any] = {
             "beam_size": 5,
             "vad_filter": True,

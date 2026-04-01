@@ -247,7 +247,7 @@ If omitted, defaults to generic flexible blueprint.
 **Won't work:**
 - File > 10 MB — returns 400 (size limit)
 - Password-protected PDF — PyMuPDF can't extract text, returns empty sections
-- Very low quality scans (below ~150 DPI) — PaddleOCR may miss text or misread characters
+- Very low quality scans (below ~150 DPI) — Surya OCR may miss text or misread characters
 - XLSX, DOC (old binary format), RTF — unsupported extensions, returns 400
 - Completely blank/image-only PDF with no text layer and bad scan quality — returns document with empty sections
 

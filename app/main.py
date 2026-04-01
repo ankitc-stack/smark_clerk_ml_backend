@@ -1924,6 +1924,9 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
         elif doc_type_upper in ("GOI_LETTER", "SERVICE_LETTER"):
             from app.ml.slots.goi_letter import _regex_fallback_goi
             slots = _regex_fallback_goi(req.prompt)
+        elif doc_type_upper == "GENERAL_LETTER":
+            from app.ml.slots.goi_letter import _regex_fallback_goi
+            slots = _regex_fallback_goi(req.prompt)   # reuse for date + ref extraction
 
         # Auto-fill date with today if not extracted from prompt
         import datetime as _dt
@@ -1960,6 +1963,14 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
                     r"\s+to\s+(?:the\s+[A-Za-z]|(?:Lt\s+Gen|Maj\s+Gen|Brig|Col|Maj|Capt|Lt|Gen)\s+)[^\n]*$",
                     "", _subj, flags=re.IGNORECASE,
                 ).strip()
+                if _subj:
+                    slots["subject"] = _subj.upper()[:200]
+            elif doc_type_upper == "GENERAL_LETTER":
+                _subj = re.sub(
+                    r"^(?:write\s+(?:a\s+)?)?(?:general\s+letter|draft\s+(?:a\s+)?letter)\s*(?:for|about|on|regarding)?\s*",
+                    "", req.prompt.strip(), flags=re.IGNORECASE,
+                )
+                _subj = re.sub(r"\s+(?:for|from|dated?|on|to)\s+.*$", "", _subj, flags=re.IGNORECASE).strip()
                 if _subj:
                     slots["subject"] = _subj.upper()[:200]
 
@@ -2003,6 +2014,10 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
             elif doc_type_upper == "INVITATION_LETTER":
                 from app.ml.slots.do_letter import draft_body_paras
                 body_texts = await draft_body_paras(db, req.prompt, min_paras=2, max_paras=3)
+            elif doc_type_upper == "GENERAL_LETTER":
+                from app.ml.slots.general_letter import draft_body_paras_general, needs_to_whomsoever
+                _is_cert = needs_to_whomsoever(req.prompt)
+                body_texts = await draft_body_paras_general(db, _body_topic, is_certificate=_is_cert)
         except Exception:
             import traceback as _tb
             COMMAND_LOGGER.warning("body para draft failed doc_type=%s: %s", doc_type_upper, _tb.format_exc())
@@ -2267,6 +2282,38 @@ async def create_blueprint_document(req: BlueprintDocRequest, db: Session = Depe
                         })
             except Exception as _e:
                 COMMAND_LOGGER.warning("blueprint fill: subject insert failed: %s", _e)
+
+        # 5c. GENERAL_LETTER certificates: INSERT "To Whomsoever It May Concern" salutation after subject
+        if doc_type_upper == "GENERAL_LETTER" and client is not None:
+            from app.ml.slots.general_letter import needs_to_whomsoever
+            if needs_to_whomsoever(req.prompt):
+                _has_sal = any(s.get("type") == "salutation"
+                               for s in (doc_data.get("sections") or []) if isinstance(s, dict))
+                if not _has_sal:
+                    try:
+                        _sal_ins = await client.apply_command(de_doc_id, de_ver, {
+                            "action": "INSERT_SECTION", "target_type": "salutation",
+                            "target_ref": None,
+                            "position": {"policy": "after", "section_type": "subject"},
+                            "ai_instruction": None,
+                        })
+                        if _sal_ins.get("status") == "applied":
+                            de_ver = _sal_ins.get("version", de_ver)
+                            _sal_id = next(
+                                (u.get("section", {}).get("id") for u in (_sal_ins.get("updates") or [])
+                                 if u.get("op") == "insert"), None,
+                            )
+                            if _sal_id:
+                                _sal_lx = text_to_lexical_node(
+                                    "To Whomsoever It May Concern", bold=True, underline=True, align="center"
+                                )
+                                _sal_c = {"richtext": {"format": "lexical", "state": _sal_lx}}
+                                _sp = await client.patch_section(de_doc_id, _sal_id, de_ver, _sal_c)
+                                de_ver = _sp.get("version", de_ver)
+                                doc_data.setdefault("sections", []).append(
+                                    {"id": _sal_id, "type": "salutation", "content": _sal_c})
+                    except Exception as _e:
+                        COMMAND_LOGGER.warning("blueprint fill: salutation insert failed: %s", _e)
 
     # ────────────────────────────────────────────────────────────────────────────
 
@@ -2755,6 +2802,7 @@ _UPLOAD_LETTER_TYPE_MAP: dict[str, tuple[str, str]] = {
     "leave_certificate": ("tmpl_leave_001", "LEAVE_CERTIFICATE"),
     "invitation_letter": ("tmpl_inv_001",   "INVITATION_LETTER"),
     "service_letter":    ("tmpl_svc_001",   "SERVICE_LETTER"),
+    "general_letter":    ("tmpl_gen_001",   "GENERAL_LETTER"),
 }
 
 # Reverse map: ML doc_type (uppercase) → doc-engine template_id string.
@@ -2835,8 +2883,8 @@ async def upload_document(
     # the blueprint order constraint → doc-engine rejects with incorrect_order.
     _FLEX_ORDER = {
         "precedence": -2, "security_classification": -1, "letterhead": 0,
-        "reference_number": 1, "date": 2, "receiver_block": 3, "salutation": 3,
-        "subject": 4, "paragraph": 5, "table_block": 5, "remarks_block": 7,
+        "reference_number": 1, "date": 2, "receiver_block": 3,
+        "subject": 4, "salutation": 5, "paragraph": 5, "table_block": 5, "remarks_block": 7,
         "annexure_block": 8, "enclosure": 9, "endorsement": 10,
         "signee_block": 11, "distribution_list": 12, "copy_to": 13, "noo": 15,
     }
@@ -2857,7 +2905,10 @@ async def upload_document(
         # Apply section-type-specific Lexical formatting so the web editor
         # matches the original letter layout as closely as possible.
         # For DOCX uploads, sec["bold"]=True if all runs were bold in the source paragraph.
+        # sec["align"] may be set by detection (e.g. "center" for "To whomsoever it may Concern").
         _docx_bold = sec.get("bold", False)
+        _docx_underline = sec.get("underline", False)
+        _detected_align = sec.get("align", "")
         if _sec_type == "subject":
             lx = text_to_lexical_node(_sec_text, bold=True, underline=True, align="center")
         elif _sec_type in ("remarks_block", "endorsement"):
@@ -2872,7 +2923,7 @@ async def upload_document(
             _signee_normalized = "\n\n".join(_format_signee_lines(_sec_text))
             lx = text_to_lexical_node(_signee_normalized, bold=_docx_bold)
         else:
-            lx = text_to_lexical_node(_sec_text, bold=_docx_bold)
+            lx = text_to_lexical_node(_sec_text, bold=_docx_bold, underline=_docx_underline, align=_detected_align)
         # Sub-paragraph sections (4.1, 4.2 …) get indent=1 in the Lexical root so the
         # editor displays them indented relative to the parent paragraph.
         import re as _re
@@ -3312,6 +3363,9 @@ async def create_from_template(
             elif _ml_dt == "MOVEMENT_ORDER":
                 from app.ml.slots.movement_order import _regex_fallback_mo
                 _slots = _regex_fallback_mo(prompt)
+            elif _ml_dt in ("GENERAL_LETTER", "UPLOADED_DOC"):
+                from app.ml.slots.goi_letter import _regex_fallback_goi
+                _slots = _regex_fallback_goi(prompt)   # extracts date + ref
         except Exception:
             pass
 
@@ -3345,6 +3399,11 @@ async def create_from_template(
             elif _ml_dt in ("LEAVE_CERTIFICATE", "INVITATION_LETTER"):
                 from app.ml.slots.do_letter import draft_body_paras as _draft
                 _body_texts = await _draft(db, prompt, min_paras=2, max_paras=3)
+            else:
+                # uploaded_doc, general_letter, inter_dep_note, or any user-saved template —
+                # fall back to generic drafter so body paragraphs are filled from the prompt.
+                from app.ml.slots.general_letter import draft_body_paras_general
+                _body_texts = await draft_body_paras_general(db, prompt)
         except Exception:
             import traceback as _tb2
             COMMAND_LOGGER.warning("body para draft (from-template) failed doc_type=%s: %s", _ml_dt, _tb2.format_exc())

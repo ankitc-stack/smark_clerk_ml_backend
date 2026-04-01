@@ -16,7 +16,7 @@
 
 ### Dependencies
 - [ ] `pip install -r requirements.txt` runs cleanly in a fresh venv
-- [ ] `libgl1` is installed in the Docker container (required for PaddleOCR/OpenCV)
+- [ ] `surya-ocr` is installed (verify: `python -c "from surya.recognition import RecognitionPredictor"`)
 - [ ] Ollama model pulled: `ollama pull llama3.1:8b` (or configured model)
 - [ ] `data/rulebook.pdf` is present (JSSD Vol I)
 - [ ] `data/prompt_library/system_prompts/` contains all prompt `.txt` files

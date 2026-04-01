@@ -15,6 +15,7 @@ requests==2.32.3
 httpx==0.27.0
 fastembed==0.4.2
 faster-whisper==1.1.1
+mlx-whisper; sys_platform == "darwin" and platform_machine == "arm64"  # Metal GPU STT on Apple M-series (skipped on Linux/Docker)
 surya-ocr          # layout-aware OCR replacing PaddleOCR (open source, USA origin)
 pytesseract        # Tesseract Python binding — used as img2table OCR backend
 img2table          # table detection from images/PDFs (uses Tesseract for cell text)

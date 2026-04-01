@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --timeout=300 -r requirements.txt
+# Download openwakeword resource models (melspectrogram.onnx, embedding_model.onnx, etc.)
+# These are not bundled in the pip package and must be fetched once at build time.
+RUN python -c "from openwakeword.utils import download_models; download_models()"
 
 COPY app ./app
 COPY scripts ./scripts
