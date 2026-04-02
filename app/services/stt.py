@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import math
 import os
+import re
 import tempfile
 import threading
 import time
@@ -18,6 +19,48 @@ from typing import Any
 MLX_LOCK = threading.Lock()
 
 from app.config import settings
+
+# ── Whisper domain prompt ────────────────────────────────────────────────────
+# Primes Whisper with domain vocabulary so it biases toward correct spellings
+# (e.g. "DO letter" not "deal letter", "GOI" not "joy", "write" not "right").
+_SMART_CLERK_PROMPT = (
+    "Write a GOI letter. Write a DO letter. Write a movement order. "
+    "Write a leave certificate. Write a service letter. Write an invitation letter. "
+    "Change the subject. Add a paragraph. Delete the paragraph. "
+    "Make the paragraph bold. Make it italic. Make the tone formal. "
+    "Change the heading. Add an enclosure. Add a signee. "
+    "Change the date. Add distribution list. Add remarks. "
+    "Smart Clerk. GOI. DO. Army. HQ. CO. OC. Adjutant. "
+    "reference number. precedence. security classification."
+)
+
+
+def _fix_mishearings(text: str) -> str:
+    """Correct common Whisper mishearings for this domain."""
+    # Strip leading Whisper silence-hallucination: "Bea Bea Bea ..." before the real command.
+    # Whisper produces "Bea" (or "Be") when it hears the brief beep/silence that follows
+    # wake-word detection before the user starts speaking.
+    text = re.sub(r'^(?:Be[a]?\s+)+', '', text, flags=re.IGNORECASE).strip()
+
+    # Strip the "over clerk" stop phrase from the end (user speaks this to end dictation).
+    # Also handles common mishearings: "over clear", "over clerk.", "over, clerk" etc.
+    text = re.sub(r'[\s,]*\bover[\s,]+cl[ae]rk\.?\s*$', '', text, flags=re.IGNORECASE).strip()
+
+    # Strip the "start clerk" wake phrase from the start if it leaked into the buffer.
+    text = re.sub(r'^\s*start\s+cl[ae]rk\.?\s*', '', text, flags=re.IGNORECASE).strip()
+
+    # "right a DO letter" → "write a DO letter"
+    text = re.sub(
+        r"\bRight\b(?=\s+a?\s*(GOI|DO|movement|leave|service|invitation|letter))",
+        "Write", text,
+    )
+    text = re.sub(
+        r"\bright\b(?=\s+a?\s*(GOI|DO|movement|leave|service|invitation|letter))",
+        "write", text,
+    )
+    # "deal letter" → "DO letter" (common mishearing of "D.O.")
+    text = re.sub(r"\bdeal letter\b", "DO letter", text, flags=re.IGNORECASE)
+    return text
 
 
 class STTError(ValueError):
@@ -216,7 +259,7 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> tuple[str, dict[str, Any]]
                 mlx_kwargs["language"] = settings.STT_FORCE_LANGUAGE
             with MLX_LOCK:
                 result = mlx.transcribe(tmp_path, path_or_hf_repo=repo, **mlx_kwargs)
-            transcript = (result.get("text") or "").strip()
+            transcript = _fix_mishearings((result.get("text") or "").strip())
             if not transcript:
                 raise STTTranscriptionError("No speech content detected in audio")
             # mlx-whisper returns segment dicts — adapt to object interface for _confidence_from_segments
@@ -241,14 +284,17 @@ def transcribe(audio_bytes: bytes, mime_type: str) -> tuple[str, dict[str, Any]]
         model = _get_faster_whisper_model_with_timeout()
         kwargs: dict[str, Any] = {
             "beam_size": 5,
+            "language": settings.STT_FORCE_LANGUAGE or "en",
             "vad_filter": True,
+            "no_speech_threshold": 0.3,
+            "initial_prompt": _SMART_CLERK_PROMPT,
         }
-        if settings.STT_FORCE_LANGUAGE:
-            kwargs["language"] = settings.STT_FORCE_LANGUAGE
 
         segments_iter, info = model.transcribe(tmp_path, **kwargs)
         segments = list(segments_iter)
-        transcript = " ".join((getattr(seg, "text", "") or "").strip() for seg in segments).strip()
+        transcript = _fix_mishearings(
+            " ".join((getattr(seg, "text", "") or "").strip() for seg in segments).strip()
+        )
         if not transcript:
             raise STTTranscriptionError("No speech content detected in audio")
 

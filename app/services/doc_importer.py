@@ -31,13 +31,16 @@ _surya_models: "dict | None" = None
 def _get_surya_models() -> dict:
     global _surya_models
     if _surya_models is None:
-        from surya.foundation import FoundationPredictor
-        from surya.detection import DetectionPredictor
-        from surya.recognition import RecognitionPredictor
-        foundation = FoundationPredictor()
+        # surya-ocr 0.6.x API
+        from surya.model.detection.model import load_model as _load_det
+        from surya.model.detection.processor import SegformerImageProcessor as _DetProc
+        from surya.model.recognition.model import load_model as _load_rec
+        from surya.model.recognition.processor import SuryaProcessor as _RecProc
         _surya_models = {
-            "det_predictor": DetectionPredictor(),
-            "rec_predictor": RecognitionPredictor(foundation_predictor=foundation),
+            "det_model":     _load_det(),
+            "det_processor": _DetProc.from_pretrained("vikp/surya_det3"),
+            "rec_model":     _load_rec(),
+            "rec_processor": _RecProc.from_pretrained("vikp/surya_rec2"),
         }
     return _surya_models
 
@@ -53,11 +56,24 @@ def _ocr_with_layout(img: Image.Image) -> list[dict]:
         {"text": str, "x_min": float, "x_max": float,
          "y_min": float, "y_max": float, "x_center": float, "conf": float}
     """
+    from surya.ocr import run_ocr
     m = _get_surya_models()
-    results = m["rec_predictor"]([img], None, m["det_predictor"])
+    results = run_ocr(
+        [img], [["en"]],
+        m["det_model"], m["det_processor"],
+        m["rec_model"], m["rec_processor"],
+    )
     boxes = []
     for line in (results[0].text_lines if results else []):
-        x1, y1, x2, y2 = line.bbox
+        # surya 0.6: bbox is [x1, y1, x2, y2] or polygon; use bounding_box attr if available
+        bbox = getattr(line, "bbox", None) or getattr(line, "bounding_box", None) or []
+        if len(bbox) == 4:
+            x1, y1, x2, y2 = bbox
+        elif len(bbox) >= 4:
+            xs = [p[0] for p in bbox]; ys = [p[1] for p in bbox]
+            x1, y1, x2, y2 = min(xs), min(ys), max(xs), max(ys)
+        else:
+            continue
         boxes.append({
             "text":     line.text,
             "x_min":    float(x1),
@@ -65,7 +81,7 @@ def _ocr_with_layout(img: Image.Image) -> list[dict]:
             "y_min":    float(y1),
             "y_max":    float(y2),
             "x_center": float((x1 + x2) / 2),
-            "conf":     float(line.confidence),
+            "conf":     float(getattr(line, "confidence", 1.0)),
         })
     boxes.sort(key=lambda b: (b["y_min"], b["x_min"]))
     # Infer bold by bbox height: lines taller than 1.25× median are likely bold/heading text.
@@ -852,6 +868,16 @@ def generate_plain_docx(sections: list[dict], title: str, out_path: str) -> None
                         tabs_el.append(t)
                         pPr.append(tabs_el)
                         p.add_run(num_prefix + "\t" + body_text)
+                    elif line.startswith("Do not indulge"):
+                        # Movement order fixed warning — bold + underline + center
+                        p = doc.add_paragraph()
+                        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        run = p.add_run(line)
+                        run.bold = True
+                        run.underline = True
+                    elif line.startswith("Distr"):
+                        # Distribution block — plain, no indent
+                        doc.add_paragraph(line)
                     else:
                         doc.add_paragraph(line)
 
@@ -1744,58 +1770,95 @@ def _build_leave_cert_para(slots: dict) -> str:
     else:
         prefix_suffix = ""
 
-    addr_parts = []
-    if vill:
-        addr_parts.append(f"village {vill}")
-    if teh:
-        addr_parts.append(f"Tehsil {teh}")
-    if dist:
-        addr_parts.append(f"District {dist}")
-    if state:
-        addr_parts.append(f"State {state}")
-    addr = ", ".join(addr_parts)
-    if pin:
-        addr += f" - {pin}"
-
     para1 = (
-        f"1.\t\t\t\tNo. {army_no} Rank {rank} Name {person_name} of {unit}{att_part}"
-        f" is hereby granted {leave_type} Leave for {days} days"
-        f" with effect from {from_date} to {to_date}.{prefix_suffix}"
+        f"1.\t\t\t\tIt is certified that No {army_no} Rank {rank} Name {person_name}"
+        f" of {unit}{att_part} is hereby spare from this br to proceed on"
+        f" {days} days {leave_type} wef {from_date} to {to_date}.{prefix_suffix}"
     )
-    if addr:
-        para1 += f" The individual is permitted to proceed to {addr}."
 
     paras = [para1]
+
+    # Para 2: address block — only if any address field is present
+    addr_lines = []
+    if vill:
+        addr_lines.append(f"\t\t\t\tVill & PO\t-\t{vill}")
+    if teh:
+        addr_lines.append(f"\t\t\t\tTeh\t\t\t-\t{teh}")
+    if dist:
+        addr_lines.append(f"\t\t\t\tDist\t\t\t-\t{dist}")
+    if state:
+        addr_lines.append(f"\t\t\t\tState\t\t-\t{state}")
+    if pin:
+        addr_lines.append(f"\t\t\t\tPin\t\t\t-\t{pin}")
     if contact:
-        paras.append(f"2.\t\t\t\tContact No: {contact}")
+        addr_lines.append(f"\t\t\t\tMob\t\t\t-\t{contact}")
+
+    if addr_lines:
+        para2 = "2.\t\t\t\tLeave address is as under:-\n" + "\n".join(addr_lines)
+        paras.append(para2)
+    elif contact:
+        paras.append(f"2.\t\t\t\tMob\t\t\t-\t{contact}")
+
     return "\n\n".join(paras)
 
 
 def _build_movement_order_para(slots: dict) -> str:
-    """Build the body paragraph text for a movement order from extracted slots."""
-    army_no = slots.get("army_no", "")
-    rank = slots.get("rank", "")
-    person_name = slots.get("person_name", "")
-    unit = slots.get("unit", "")
-    att_unit = slots.get("att_unit", "")
-    destination = slots.get("destination", "")
+    """Build the body paragraph text for a movement order from extracted slots.
+
+    Matches the official IAFT-1759 template with all 10 standard paragraphs + Distr block.
+    """
+    army_no        = slots.get("army_no", "")
+    rank           = slots.get("rank", "")
+    person_name    = slots.get("person_name", "")
+    unit           = slots.get("unit", "")
+    att_unit       = slots.get("att_unit", "")
+    destination    = slots.get("destination", "")
     departure_date = slots.get("departure_date", "")
     departure_time = slots.get("departure_time", "")
-    route = slots.get("route", "MR")
-    destination_desc = slots.get("destination_desc", "Known to the indl")
-    remarks = slots.get("remarks", "Proceeding on temp duty")
+    route          = slots.get("route", "NH")
+    station        = slots.get("station", "")
+    distr_unit     = slots.get("distr_unit", "") or unit
 
-    att_part = f", att with {att_unit}" if att_unit else ""
-    time_part = f" ({departure_time})" if departure_time else ""
+    att_part  = f" att with {att_unit}" if att_unit else ""
+    time_str  = f" {departure_time}" if departure_time else ""
+    date_str  = departure_date or ""
 
-    para1 = (
-        f"1.\t\t\t\t{rank} {person_name}, No {army_no}, of {unit}{att_part}"
-        f" will proceed on temporary duty to {destination}"
-        f" on {departure_date}{time_part}."
+    # Fixed warning line that always appears after the subject in every movement order
+    WARNING_LINE = (
+        "Do not indulge in any such activities during your journey which disrespect"
+        " your country and dignity: Maintain the dignity of the Army and yourself"
+        " and do not take food/drinks from any unknown person."
     )
-    para2 = f"2.\t\t\t\t{destination_desc}"
-    para3 = f"3.\t\t\t\t{remarks}. The journey will be performed by {route}."
-    return "\n\n".join([para1, para2, para3])
+
+    paras = [
+        WARNING_LINE,
+        (
+            f"1.\t\t\t\tNo {army_no} Rank {rank} Name {person_name}"
+            f" of {unit}{att_part}, will be proceeding on temp duty to {destination}."
+        ),
+        f"2.\t\t\t\tDeparture date and time\t: {date_str}{time_str}.",
+        f"3.\t\t\t\tRoute/Via\t: {route}\t\tDestination\t: Known to the indl.",
+        f"4.\t\t\t\tAuth\t: This move order.",
+        f"5.\t\t\t\tRemarks\t: Proceeding on temp duty.",
+        f"6.\t\t\t\tOn arrival at (Station) {station} they will report to concerned auth.",
+        f"7.\t\t\t\tSOS _______ SORS wef {date_str} ration up to and for {date_str}.",
+        f"8.\t\t\t\tHe is in possession of his I Card.",
+        (
+            "9.\t\t\t\tProvisions of Aos 782/64 and 504/67 have been explained,"
+            " Anti Malaria precaution will be strictly observed."
+        ),
+        "10.\t\t\t\tHe will not be discussing military matter with unauthorized persons.",
+    ]
+
+    body = "\n\n".join(paras)
+
+    # Distribution block
+    distr = "Distr\t:\n\t\t\t\t1.\t\tIndl Concerned."
+    if distr_unit:
+        distr += f"\n\t\t\t\t2.\t\t{distr_unit}"
+    body += "\n\n" + distr
+
+    return body
 
 
 def generate_slot_docx(doc_data: dict, doc_type: str, title: str, out_path: str) -> bool:

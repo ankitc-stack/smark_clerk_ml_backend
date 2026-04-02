@@ -3531,7 +3531,10 @@ async def create_from_template(
             elif _ml_dt == "MOVEMENT_ORDER":
                 from app.ml.slots.movement_order import draft_numbered_paras as _mo_draft
                 _body_texts = await _mo_draft(db, prompt, min_paras=2, max_paras=4)
-            elif _ml_dt in ("LEAVE_CERTIFICATE", "INVITATION_LETTER"):
+            elif _ml_dt == "LEAVE_CERTIFICATE":
+                from app.services.doc_importer import _build_leave_cert_para
+                _body_texts = [_build_leave_cert_para(_slots)]
+            elif _ml_dt == "INVITATION_LETTER":
                 from app.ml.slots.do_letter import draft_body_paras as _draft
                 _body_texts = await _draft(db, prompt, min_paras=2, max_paras=3)
             else:
@@ -3782,8 +3785,11 @@ async def stt_stream_ws(websocket: WebSocket):
     _log = logging.getLogger("uvicorn.error")
     await websocket.accept()
 
-    _STRIDE_SAMPLES = 16000       # run Whisper every 1 s
-    _MAX_SAMPLES    = 16000 * 60  # cap buffer at 60 s
+    _STRIDE_SAMPLES  = 16000       # run Whisper every 1 s
+    _MAX_SAMPLES     = 16000 * 60  # cap buffer at 60 s
+    # Skip the first 0.5 s of audio before transcribing — avoids Whisper hallucinating
+    # on the wake-word beep / silence that leaks into the buffer right after activation.
+    _SKIP_SAMPLES    = 8000        # 0.5 s at 16 kHz
 
     audio_buf: list[np.ndarray] = []
     buf_samples  = 0
@@ -3799,12 +3805,12 @@ async def stt_stream_ws(websocket: WebSocket):
                 # Pass float32 numpy array directly — avoids ffmpeg dependency entirely.
                 import numpy as _np
                 audio_f32 = _np.frombuffer(pcm_bytes, dtype=_np.int16).astype(_np.float32) / 32768.0
-                from app.services.stt import _load_mlx_whisper, MLX_LOCK
+                from app.services.stt import _load_mlx_whisper, MLX_LOCK, _fix_mishearings
                 mlx  = _load_mlx_whisper()
                 repo = f"mlx-community/whisper-{settings.STT_MODEL_NAME}"
                 with MLX_LOCK:
                     res  = mlx.transcribe(audio_f32, path_or_hf_repo=repo)
-                return (res.get("text") or "").strip()
+                return _fix_mishearings((res.get("text") or "").strip())
             else:
                 # faster_whisper needs a WAV file on disk
                 buf = io.BytesIO()
@@ -3815,10 +3821,14 @@ async def stt_stream_ws(websocket: WebSocket):
                 try:
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
                         tf.write(buf.getvalue()); tmp = tf.name
-                    from app.services.stt import _load_faster_whisper_model
+                    from app.services.stt import _load_faster_whisper_model, _SMART_CLERK_PROMPT, _fix_mishearings
                     model = _load_faster_whisper_model()
-                    segs, _ = model.transcribe(tmp, beam_size=5, vad_filter=True)
-                    return " ".join((getattr(s, "text", "") or "").strip() for s in segs).strip()
+                    segs, _ = model.transcribe(
+                        tmp, beam_size=5, language="en",
+                        vad_filter=True, no_speech_threshold=0.3,
+                        initial_prompt=_SMART_CLERK_PROMPT,
+                    )
+                    return _fix_mishearings(" ".join((getattr(s, "text", "") or "").strip() for s in segs).strip())
                 finally:
                     if tmp:
                         try: os.remove(tmp)
@@ -3853,14 +3863,13 @@ async def stt_stream_ws(websocket: WebSocket):
                 except Exception:
                     data = {}
                 if data.get("action") == "stop":
-                    if _last_interim:
-                        # Reuse the last good interim — avoids re-transcribing background
-                        # noise that leaked into the buffer after the command ended.
-                        await websocket.send_json({"type": "final", "text": _last_interim})
-                    elif audio_buf:
-                        # No interim yet (speech was shorter than the stride window) —
-                        # do a one-shot transcription of what we have.
-                        all_pcm = np.concatenate(audio_buf).astype(np.int16).tobytes()
+                    if audio_buf:
+                        # Always re-transcribe the full buffer — never reuse _last_interim,
+                        # which may contain Whisper hallucinations from a shorter partial buffer.
+                        # Also skip the first 0.5 s to avoid wake-word bleed-in noise.
+                        all_audio = np.concatenate(audio_buf)
+                        trimmed   = all_audio[_SKIP_SAMPLES:] if len(all_audio) > _SKIP_SAMPLES else all_audio
+                        all_pcm   = trimmed.astype(np.int16).tobytes()
                         loop    = asyncio.get_event_loop()
                         final   = await loop.run_in_executor(
                             None, lambda b=all_pcm: _transcribe_pcm(b)
@@ -3894,8 +3903,9 @@ async def stt_stream_ws(websocket: WebSocket):
                 continue  # previous inference in flight — skip
 
             _wsp_running = True
-            pcm_snap = np.concatenate(audio_buf).astype(np.int16).tobytes()
-            asyncio.create_task(_run_interim(pcm_snap))
+            all_audio = np.concatenate(audio_buf)
+            pcm_snap = all_audio[_SKIP_SAMPLES:] if len(all_audio) > _SKIP_SAMPLES else all_audio
+            asyncio.create_task(_run_interim(pcm_snap.astype(np.int16).tobytes()))
 
     except WebSocketDisconnect:
         pass

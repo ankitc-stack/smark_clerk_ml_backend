@@ -23,6 +23,7 @@ MO_KEYS = [
     "army_no", "rank", "person_name", "unit", "att_unit",
     "destination", "departure_date", "departure_time",
     "route", "destination_desc", "remarks", "distr_unit",
+    "station",
     "signatory_name", "signatory_designation", "signatory_dept",
 ]
 
@@ -203,6 +204,15 @@ def _regex_fallback_mo(prompt: str) -> Dict[str, str]:
         out["remarks"] = m.group(1).strip()
     else:
         out["remarks"] = "Proceeding on temp duty"
+
+    # ── Station: "Station: c/o 56 APO" / "at New Delhi" ──────────────────
+    m = re.search(r"\bStation\s*[:\-]\s*([^\n,]+)", p, flags=re.IGNORECASE)
+    if m:
+        out["station"] = m.group(1).strip()
+    else:
+        m = re.search(r"\bc/o\s+\d+\s+APO\b", p, flags=re.IGNORECASE)
+        if m:
+            out["station"] = m.group(0).strip()
 
     # ── Distribution unit (same as parent unit) ───────────────────────────
     out["distr_unit"] = out["unit"] or ""

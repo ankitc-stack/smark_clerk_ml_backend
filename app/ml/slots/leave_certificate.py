@@ -164,7 +164,7 @@ def _regex_fallback(prompt: str) -> Dict[str, str]:
     # Stops at: att/with/is/for/hereby, a standalone digit (start of days count),
     # or end of string.
     m = re.search(
-        r"\bof\s+(\d+\s+[A-Za-z][A-Za-z\s()/]*?)(?=\s+(?:att|with|is|for|hereby)\b|\s+\d+\s+days|\s+\d+\s+(?:AL|EL|CL|PAL|ML|SL)\b|,|\.|$)",
+        r"\bof\s+(\d+\s+[A-Za-z][A-Za-z\s()/]*?)(?=\s+(?:att|with|is|for|hereby)\b|\s+\d+\s+days|\s+\d+\s+(?:AL|EL|CL|PAL|ML|SL)\b|\s+(?:AL|EL|CL|PAL|ML|SL)\b|,|\.|$)",
         p, flags=re.IGNORECASE,
     )
     if m:

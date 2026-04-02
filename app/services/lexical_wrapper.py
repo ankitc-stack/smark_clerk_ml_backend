@@ -93,8 +93,9 @@ def _apply_style_to_node(node: dict, style: dict) -> dict:
     if style.get("italic"):    fmt |= FLAG_ITALIC
     if style.get("underline"): fmt |= FLAG_UNDERLINE
     node["format"] = fmt
-    if style.get("font") or style.get("color") or style.get("size") or style.get("highlight"):
+    if style.get("bold") or style.get("font") or style.get("color") or style.get("size") or style.get("highlight"):
         css = _parse_css(node.get("style", ""))
+        if style.get("bold"):      css["font-weight"] = "700"
         if style.get("font"):      css["font-family"] = style["font"]
         if style.get("color"):
             _hex = _to_hex_color(style["color"])
@@ -291,6 +292,8 @@ def text_to_lexical_node(
         f"font-size:{font_size}pt;"
         f"color:{text_color};"
     )
+    if bold:
+        inline_style += "font-weight:700;"
 
     _fmt = 0
     if bold:
