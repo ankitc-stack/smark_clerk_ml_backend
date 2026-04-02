@@ -31,7 +31,11 @@ _surya_models: "dict | None" = None
 def _get_surya_models() -> dict:
     global _surya_models
     if _surya_models is None:
-        # surya-ocr 0.6.x API
+        # Register custom image processor so transformers AutoImageProcessor can find it
+        from surya.model.recognition.processor import SuryaImageProcessor as _SuryaImgProc
+        from transformers import AutoImageProcessor
+        AutoImageProcessor.register("SuryaImageProcessor", _SuryaImgProc)
+
         from surya.model.detection.model import load_model as _load_det
         from surya.model.detection.processor import SegformerImageProcessor as _DetProc
         from surya.model.recognition.model import load_model as _load_rec
@@ -40,7 +44,7 @@ def _get_surya_models() -> dict:
             "det_model":     _load_det(),
             "det_processor": _DetProc.from_pretrained("vikp/surya_det3"),
             "rec_model":     _load_rec(),
-            "rec_processor": _RecProc.from_pretrained("vikp/surya_rec2"),
+            "rec_processor": _RecProc(),
         }
     return _surya_models
 
